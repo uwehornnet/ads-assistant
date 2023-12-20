@@ -1,118 +1,151 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
+import { useEffect, useState } from "react";
+import Image from "next/image";
 
-const inter = Inter({ subsets: ['latin'] })
+import { Inter } from "next/font/google";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
-  return (
-    <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
-    >
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">pages/index.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+	const [placeholder, setPalceholder] = useState("prompt");
+	const [length, setLength] = useState(30);
+	const [params, setParams] = useState(null);
+	const [link, setLink] = useState(null);
+	const [results, setResults] = useState([]);
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+	const fetchData = async () => {
+		const res = await fetch(`${location.origin}/api/google/ads/get`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				length,
+				params,
+			}),
+		});
 
-      <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+		const data = await res.json();
+		setResults(data.results);
+		setLink(data.filepath);
+	};
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
+	const placeholderLoop = () => {
+		const placeholders = ["prompt", "question", "query", "keywords", "topic"];
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Discover and deploy boilerplate example Next.js&nbsp;projects.
-          </p>
-        </a>
+		let i = 0;
+		setInterval(() => {
+			setPalceholder(placeholders[i]);
+			i++;
+			if (i === placeholders.length) i = 0;
+		}, 2000);
+	};
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+	useEffect(() => {
+		placeholderLoop();
+	}, []);
+
+	return (
+		<>
+			<div className="absolute w-2/3 aspect-square rounded-full bg-orange-400 blur-[240px] top-1/2 left-1/2 opacity-10"></div>
+			<div className="absolute w-3/4 aspect-square rounded-full bg-indigo-400 blur-[240px] -top-1/3 right-0 opacity-10"></div>
+			<div className="absolute w-3/4 aspect-square rounded-full bg-indigo-400 blur-[240px] -bottom-1/2 opacity-10"></div>
+			<div className="absolute w-1/2 aspect-square rounded-full bg-pink-400 blur-[240px] opacity-10"></div>
+			<main
+				className={`flex min-h-screen flex-col items-center md:justify-center p-4 md:p-8 ${inter.className} backdrop-blur-2xl`}
+			>
+				<div className="relative rounded-xl outline-none w-full max-w-[560px] shadow-lg">
+					<textarea
+						name="prompt"
+						id="prompt"
+						cols="30"
+						rows="10"
+						onChange={(e) => setParams(e.target.value)}
+						className="bg-slate-100/80 dark:bg-slate-700/80 backdrop-blur-md rounded-lg p-2 ring-0 border-0 w-full focus:border-0 outline-none focus:outline-indigo-600 outline-2 outline-offset-4 placeholder-slate-300 dark:placeholder-slate-900"
+						placeholder={`Add your ${placeholder} ... `}
+					></textarea>
+
+					<div className="absolute w-full bottom-[1px] left-0 ">
+						<ul className="flex items-center justify-end p-2">
+							<li className="rounded-full bg-slate-200 dark:bg-slate-800 text-slate-500 flex items-center gap-2  py-1 px-3 text-sm cursor-pointer">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 20 20"
+									fill="currentColor"
+									className="w-4 h-4"
+								>
+									<path
+										fillRule="evenodd"
+										d="M4.5 2A2.5 2.5 0 0 0 2 4.5v3.879a2.5 2.5 0 0 0 .732 1.767l7.5 7.5a2.5 2.5 0 0 0 3.536 0l3.878-3.878a2.5 2.5 0 0 0 0-3.536l-7.5-7.5A2.5 2.5 0 0 0 8.38 2H4.5ZM5 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
+										clipRule="evenodd"
+									/>
+								</svg>
+
+								<span>Label</span>
+							</li>
+						</ul>
+						<div className="flex gap-4 items-center justify-between p-2 rounded-br-lg rounded-bl-lg bg-slate-200 dark:bg-slate-800">
+							<button onClick={() => {}} className="text-slate-400 p-2 flex items-center gap-2">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									strokeWidth={2.5}
+									stroke="currentColor"
+									className="w-4 h-4"
+								>
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
+									/>
+								</svg>
+								<span>upload file</span>
+							</button>
+							<button
+								onClick={() => fetchData()}
+								className="bg-indigo-700 text-white rounded-full py-2 px-6 disabled:hover:bg-indigo-500 disabled:cursor-not-allowed"
+							>
+								post
+							</button>
+						</div>
+					</div>
+				</div>
+
+				<dd className="text-sm bg-slate-200 dark:bg-slate-800 text-slate-500 w-full max-w-[560px] -mt-4 pt-4 rounded-br-xl rounded-bl-xl">
+					{results.map((result, idx) => (
+						<ul
+							key={idx}
+							role="list"
+							className="divide-y devide-slate-400 dark:divide-slate-700 rounded-md"
+						>
+							{Object.keys(result).map((key, idx) => (
+								<li className="flex items-center justify-between p-2 text-sm leading-6">
+									<div className="flex w-0 flex-1 items-center">
+										<div className="ml-4 flex min-w-0 flex-1 gap-2">
+											<span className="truncate font-medium">{key}</span>
+										</div>
+									</div>
+									<div className="ml-4 flex-shrink-0">
+										<span className="font-medium text-slate-400">{result[key]}</span>
+									</div>
+								</li>
+							))}
+						</ul>
+					))}
+
+					{link && (
+						<div className="flex items-center justify-center p-4">
+							<a
+								href={link}
+								download
+								className="font-medium text-indigo-600 hover:text-indigo-500 dark:bg-slate-900 inline-block rounded-full px-6 py-3 text-center"
+							>
+								download csv
+							</a>
+						</div>
+					)}
+				</dd>
+			</main>
+		</>
+	);
 }
