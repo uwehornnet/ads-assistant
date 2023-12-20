@@ -32,36 +32,47 @@ export default async function handler(req, res) {
 		const filename = "google-ads.csv";
 		const file = path.join(process.cwd(), "public/files", filename);
 
-		const keywords = params.split(",");
-		const apiResponse = await Promise.all(
-			keywords.map(async (keyword) => {
-				const apiResponse = await fetchAPIResponse({ keyword, length });
-				const apiResponseArray = apiResponse.content.split("\n").map((item) => {
-					const arr = item.split('"');
-					return arr[1];
-				});
+		// const keywords = params.split(",");
+		// const apiResponse = await Promise.all(
+		// 	keywords.map(async (keyword) => {
+		// 		const apiResponse = await fetchAPIResponse({ keyword, length });
+		// 		const apiResponseArray = apiResponse.content.split("\n").map((item) => {
+		// 			const arr = item.split('"');
+		// 			return arr[1];
+		// 		});
 
-				const resObject = {};
+		// 		const resObject = {};
 
-				for (let i = 0; i < apiResponseArray.length; i++) {
-					resObject[`google_ads_${i + 1}`] = apiResponseArray[i];
-				}
+		// 		for (let i = 0; i < apiResponseArray.length; i++) {
+		// 			resObject[`google_ads_${i + 1}`] = apiResponseArray[i];
+		// 		}
 
-				return {
-					keyword,
-					...resObject,
-				};
-			})
-		);
-
-		// const apiResponse = [
-		// 	{
-		// 		keyword: "iqos",
-		// 		google_ads_1: "Discover IQOS - The Future of Smoking",
-		// 		google_ads_2: "Upgrade Your Smoking Experience with IQOS",
-		// 		google_ads_3: "Experience Smoke-Free, Tobacco Heating with IQOS",
-		// 	},
-		// ];
+		// 		return {
+		// 			keyword,
+		// 			...resObject,
+		// 		};
+		// 	})
+		// );
+		const apiResponse = [
+			{
+				keyword: "apple air tags",
+				google_ads_1: "Find lost items",
+				google_ads_2: "Track with ease",
+				google_ads_3: "Never lose again",
+			},
+			{
+				keyword: " iqos",
+				google_ads_1: "IQOS: Smoke-Free Alternative",
+				google_ads_2: "Discover IQOS: Better Choice",
+				google_ads_3: "Switch to IQOS: Enjoy Freedom",
+			},
+			{
+				keyword: " health insurrance",
+				google_ads_1: "Save on Health Insurance!",
+				google_ads_2: "Get Affordable Coverage",
+				google_ads_3: "Compare Health Plans",
+			},
+		];
 
 		const csv = createCSV(apiResponse);
 		const csvFile = fs.writeFileSync(file, csv);

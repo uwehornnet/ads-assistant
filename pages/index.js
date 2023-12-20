@@ -59,6 +59,7 @@ export default function Home() {
 						id="prompt"
 						cols="30"
 						rows="10"
+						value={`apple air tags, iqos, health insurrance`}
 						onChange={(e) => setParams(e.target.value)}
 						className="bg-slate-100/80 dark:bg-slate-700/80 backdrop-blur-md rounded-lg p-2 ring-0 border-0 w-full focus:border-0 outline-none focus:outline-indigo-600 outline-2 outline-offset-4 placeholder-slate-300 dark:placeholder-slate-900"
 						placeholder={`Add your ${placeholder} ... `}
