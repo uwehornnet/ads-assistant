@@ -52,7 +52,7 @@ export default function Home() {
 
 	return (
 		<DefaultLayout>
-			<header className="bg-white shadow">
+			<header className="bg-white dark:bg-slate-900 shadow">
 				<div className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8">
 					<div className="relative outline-none w-full">
 						<textarea
@@ -62,7 +62,7 @@ export default function Home() {
 							rows="4"
 							value={`apple air tags, iqos, health insurrance`}
 							onChange={(e) => setParams(e.target.value)}
-							className="bg-slate-50  backdrop-blur-md md:rounded-lg p-2 ring-0 border-0 w-full focus:border-0 outline-none focus:outline-indigo-600 outline-2 outline-offset-4 placeholder-slate-800 dark:placeholder-slate-400 text-slate-800 dark:text-slate-400"
+							className="bg-slate-50 dark:bg-slate-800  backdrop-blur-md md:rounded-lg p-2 ring-0 border-0 w-full focus:border-0 outline-none focus:outline-indigo-600 outline-2 outline-offset-4 placeholder-slate-800 dark:placeholder-slate-400 text-slate-800 dark:text-slate-400"
 							placeholder={`Add your ${placeholder} ... `}
 						></textarea>
 
@@ -108,7 +108,7 @@ export default function Home() {
 					</div>
 				</div>
 			</header>
-			<main className="p-2">
+			<main className="relative">
 				{results.length ? (
 					<div className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8 overflow-x-auto relative ">
 						<div className="overflow-x-auto relative shadow-md sm:rounded-lg">
@@ -118,7 +118,7 @@ export default function Home() {
 										<th scope="col" className="py-3 px-6">
 											keyword
 										</th>
-										<th scope="col" className="py-3 px-6" colSpan={3}>
+										<th scope="col" className="py-3 px-6 whitespace-pre" colSpan={3}>
 											text lines
 										</th>
 									</tr>
@@ -127,7 +127,7 @@ export default function Home() {
 									{results.map((result, idx) => (
 										<tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
 											{Object.keys(result).map((key, i) => (
-												<td className="py-4 px-6">{result[key]}</td>
+												<td className="py-4 px-6 whitespace-pre">{result[key]}</td>
 											))}
 										</tr>
 									))}
