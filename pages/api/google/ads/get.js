@@ -74,10 +74,13 @@ export default async function handler(req, res) {
 			},
 		];
 
+
 		const csv = createCSV(apiResponse);
 		//const csvFile = fs.writeFileSync(file, csv);
-
-		res.status(200).json({ status: "success", results: apiResponse, filepath: `/files/${filename}` });
+		setTimeout(() => {
+			res.status(200).json({ status: "success", results: apiResponse, filepath: `/files/${filename}` });
+		}, 4000);
+		
 	} catch (error) {
 		console.log(error);
 		res.status(500).json({ status: "error", message: error.message });
