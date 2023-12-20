@@ -75,7 +75,7 @@ export default async function handler(req, res) {
 		];
 
 		const csv = createCSV(apiResponse);
-		const csvFile = fs.writeFileSync(file, csv);
+		//const csvFile = fs.writeFileSync(file, csv);
 
 		res.status(200).json({ status: "success", results: apiResponse, filepath: `/files/${filename}` });
 	} catch (error) {
