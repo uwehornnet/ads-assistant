@@ -38,11 +38,7 @@ export default function DefaultLayout({ children }) {
 								<div className="flex h-16 items-center justify-between">
 									<div className="flex items-center">
 										<div className="flex-shrink-0">
-											<img
-												className="h-8 w-8"
-												src="https://www.kwooza.com/assets/img/logo.png"
-												alt="Your Company"
-											/>
+											<img className="h-8 w-auto" src="/logo.png" alt="Your Company" />
 										</div>
 										<div className="hidden md:block">
 											<div className="ml-10 flex items-baseline space-x-4">
