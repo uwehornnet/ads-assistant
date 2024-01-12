@@ -3,21 +3,46 @@ import Image from "next/image";
 
 import { Inter } from "next/font/google";
 import DefaultLayout from "@/layouts/Default";
+import Modal from "@/components/Modal";
+import { Switch } from "@headlessui/react";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
 	const [loading, setLoading] = useState(false);
 	const [placeholder, setPalceholder] = useState("prompt");
+	const [keywords, setKeywords] = useState("airbag steering wheels, battery garden sparyer, exhaust resonator pipe");
 	const [length, setLength] = useState(30);
 	const [params, setParams] = useState(null);
 	const [link, setLink] = useState(null);
 	const [results, setResults] = useState([]);
+	const [showModal, setShowModal] = useState(false);
+	const [itemsToGenerate, setItemsToGenerate] = useState({
+		variations: 3,
+		items: [
+			{
+				type: "Google Ads headline",
+				state: true,
+				length: 30,
+			},
+			{
+				type: "Google Ads description",
+				state: true,
+				length: 90,
+			},
+		],
+	});
+
+	const toggleModal = (state) => {
+		setShowModal(state);
+	};
 
 	const fetchData = async () => {
 		if (loading) return;
-
+		setShowModal(false);
 		setLoading(true);
+
+		return;
 		const res = await fetch(`${location.origin}/api/google/ads/get`, {
 			method: "POST",
 			headers: {
@@ -60,8 +85,8 @@ export default function Home() {
 							id="prompt"
 							cols="30"
 							rows="4"
-							value={`apple air tags, iqos, health insurrance`}
-							onChange={(e) => setParams(e.target.value)}
+							value={keywords}
+							onChange={(e) => setKeywords(e.target.value)}
 							className="bg-slate-50 dark:bg-slate-800  backdrop-blur-md md:rounded-lg p-2 ring-0 border-0 w-full focus:border-0 outline-none focus:outline-indigo-600 outline-2 outline-offset-4 placeholder-slate-800 dark:placeholder-slate-400 text-slate-800 dark:text-slate-400"
 							placeholder={`Add your ${placeholder} ... `}
 						></textarea>
@@ -90,7 +115,7 @@ export default function Home() {
 									<span>upload file</span>
 								</button>
 								<button
-									onClick={() => fetchData()}
+									onClick={() => toggleModal(true)}
 									className="bg-indigo-700 text-white rounded-md py-2 px-6 disabled:hover:bg-indigo-500 disabled:cursor-not-allowed"
 								>
 									{loading ? (
@@ -137,6 +162,84 @@ export default function Home() {
 					</div>
 				) : null}
 			</main>
+			<Modal isOpen={showModal} toggle={toggleModal}>
+				<>
+					<div className="flex flex-col gap-2 my-8">
+						<div className="grid">
+							<input
+								type="text"
+								value={itemsToGenerate.variations}
+								onChange={(e) => {
+									setItemsToGenerate({
+										...itemsToGenerate,
+										variations: e.target.value,
+									});
+								}}
+								className="ring-0 border-0 w-full focus:border-0 outline-none focus:outline-indigo-600 outline-2 outline-offset-2 block p-2 rounded-md dark:bg-slate-700 dark:text-slate-200"
+							/>
+						</div>
+						{itemsToGenerate.items.map((item, idx) => (
+							<div key={idx} className="flex items-center justify-start">
+								<label className="flex items-center gap-2 dark:text-slate-200">
+									<Switch
+										checked={item.state}
+										onChange={() => {
+											const newItems = [...itemsToGenerate.items];
+											newItems[idx].state = !newItems[idx].state;
+											setItemsToGenerate({
+												...itemsToGenerate,
+												items: newItems,
+											});
+										}}
+										className={`${
+											item.state ? "bg-indigo-700" : "bg-gray-400 dark:bg-slate-500"
+										} relative inline-flex h-6 w-11 items-center rounded-full`}
+									>
+										<span
+											className={`${
+												item.state ? "translate-x-6" : "translate-x-1"
+											} inline-block h-4 w-4 transform rounded-full bg-white transition`}
+										/>
+									</Switch>
+									<span>{item.type}</span>
+								</label>
+								<div className="flex-1 flex items-center justify-end">
+									<input
+										type="text"
+										value={item.length}
+										disabled={!item.state}
+										onChange={(e) => {
+											const newItems = [...itemsToGenerate.items];
+											newItems[idx].length = e.target.value;
+											setItemsToGenerate({
+												...itemsToGenerate,
+												items: newItems,
+											});
+										}}
+										className="ring-0 border-0 w-full focus:border-0 outline-none focus:outline-indigo-600 outline-2 outline-offset-2 block max-w-[80px]  p-2 rounded-md dark:bg-slate-700 dark:text-slate-200 text-right disabled:text-slate-500 disabled:cursor-not-allowed"
+									/>
+								</div>
+							</div>
+						))}
+					</div>
+					<div className="mt-4 flex items-center justify-start gap-4">
+						<button
+							type="button"
+							className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+							onClick={() => setShowModal(false)}
+						>
+							cancle
+						</button>
+						<button
+							type="button"
+							className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 dark:bg-indigo-700 dark:text-slate-300 dark:hover:bg-indigo-700 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+							onClick={() => fetchData()}
+						>
+							generate
+						</button>
+					</div>
+				</>
+			</Modal>
 		</DefaultLayout>
 	);
 }
