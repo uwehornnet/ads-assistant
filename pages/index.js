@@ -87,7 +87,7 @@ export default function Home() {
 							rows="4"
 							value={keywords}
 							onChange={(e) => setKeywords(e.target.value)}
-							className="bg-slate-50 dark:bg-slate-800  backdrop-blur-md md:rounded-lg p-2 ring-0 border-0 w-full focus:border-0 outline-none focus:outline-indigo-600 outline-2 outline-offset-4 placeholder-slate-800 dark:placeholder-slate-400 text-slate-800 dark:text-slate-400"
+							className="bg-slate-50 dark:bg-slate-800  backdrop-blur-md md:rounded-lg p-2 ring-0 border-0 w-full focus:border-0 outline-none focus:outline-blue-600 outline-2 outline-offset-4 placeholder-slate-800 dark:placeholder-slate-400 text-slate-800 dark:text-slate-400"
 							placeholder={`Add your ${placeholder} ... `}
 						></textarea>
 
@@ -96,7 +96,7 @@ export default function Home() {
 								<button
 									disabled
 									onClick={() => {}}
-									className="text-indigo-400 p-2 flex items-center gap-2 disabled:text-slate-700 disabled:cursor-not-allowed bg-slate-100 rounded-md"
+									className="text-blue-400 p-2 flex items-center gap-2 disabled:text-slate-700 disabled:cursor-not-allowed bg-slate-100 rounded-md"
 								>
 									<svg
 										xmlns="http://www.w3.org/2000/svg"
@@ -116,7 +116,7 @@ export default function Home() {
 								</button>
 								<button
 									onClick={() => toggleModal(true)}
-									className="bg-indigo-700 text-white rounded-md py-2 px-6 disabled:hover:bg-indigo-500 disabled:cursor-not-allowed"
+									className="bg-blue-700 text-white rounded-md py-2 px-6 disabled:hover:bg-blue-500 disabled:cursor-not-allowed"
 								>
 									{loading ? (
 										<div className="flex space-x-1 justify-center items-center py-2">
@@ -175,7 +175,7 @@ export default function Home() {
 										variations: e.target.value,
 									});
 								}}
-								className="ring-0 border-0 w-full focus:border-0 outline-none focus:outline-indigo-600 outline-2 outline-offset-2 block p-2 rounded-md dark:bg-slate-700 dark:text-slate-200"
+								className="ring-0 border-0 w-full focus:border-0 outline-none focus:outline-blue-600 outline-2 outline-offset-2 block p-2 rounded-md dark:bg-slate-700 dark:text-slate-200"
 							/>
 						</div>
 						{itemsToGenerate.items.map((item, idx) => (
@@ -192,7 +192,7 @@ export default function Home() {
 											});
 										}}
 										className={`${
-											item.state ? "bg-indigo-700" : "bg-gray-400 dark:bg-slate-500"
+											item.state ? "bg-blue-700" : "bg-gray-400 dark:bg-slate-500"
 										} relative inline-flex h-6 w-11 items-center rounded-full`}
 									>
 										<span
@@ -216,7 +216,7 @@ export default function Home() {
 												items: newItems,
 											});
 										}}
-										className="ring-0 border-0 w-full focus:border-0 outline-none focus:outline-indigo-600 outline-2 outline-offset-2 block max-w-[80px]  p-2 rounded-md dark:bg-slate-700 dark:text-slate-200 text-right disabled:text-slate-500 disabled:cursor-not-allowed"
+										className="ring-0 border-0 w-full focus:border-0 outline-none focus:outline-blue-600 outline-2 outline-offset-2 block max-w-[80px]  p-2 rounded-md dark:bg-slate-700 dark:text-slate-200 text-right disabled:text-slate-500 disabled:cursor-not-allowed"
 									/>
 								</div>
 							</div>
@@ -232,7 +232,7 @@ export default function Home() {
 						</button>
 						<button
 							type="button"
-							className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 dark:bg-indigo-700 dark:text-slate-300 dark:hover:bg-indigo-700 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+							className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 dark:bg-blue-700 dark:text-slate-300 dark:hover:bg-blue-700 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
 							onClick={() => fetchData()}
 						>
 							generate
