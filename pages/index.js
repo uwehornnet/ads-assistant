@@ -11,26 +11,20 @@ const inter = Inter({ subsets: ["latin"] });
 export default function Home() {
 	const [loading, setLoading] = useState(false);
 	const [placeholder, setPalceholder] = useState("prompt");
-	const [keywords, setKeywords] = useState("airbag steering wheels, battery garden sparyer, exhaust resonator pipe");
-	const [length, setLength] = useState(30);
-	const [params, setParams] = useState(null);
+
 	const [link, setLink] = useState(null);
 	const [results, setResults] = useState([]);
 	const [showModal, setShowModal] = useState(false);
-	const [itemsToGenerate, setItemsToGenerate] = useState({
-		variations: 3,
-		items: [
-			{
-				type: "Google Ads headline",
-				state: true,
-				length: 30,
-			},
-			{
-				type: "Google Ads description",
-				state: true,
-				length: 90,
-			},
-		],
+
+	const [variations, setVariations] = useState(3);
+	const [keywords, setKeywords] = useState("airbag steering wheels, battery garden sparyer, exhaust resonator pipe");
+	const [headline, setHeadline] = useState({
+		state: true,
+		length: 30,
+	});
+	const [description, setDescription] = useState({
+		state: true,
+		length: 90,
 	});
 
 	const toggleModal = (state) => {
@@ -41,22 +35,23 @@ export default function Home() {
 		if (loading) return;
 		setShowModal(false);
 		setLoading(true);
-
-		return;
 		const res = await fetch(`${location.origin}/api/google/ads/get`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify({
-				length,
-				params,
+				keywords: keywords.split(","),
+				headline,
+				description,
+				variations,
 			}),
 		});
 
 		const data = await res.json();
-		setResults(data.results);
-		setLink(data.filepath);
+
+		setResults(data.response.keywords);
+		// setLink(data.filepath);
 		setLoading(false);
 	};
 
@@ -143,17 +138,33 @@ export default function Home() {
 										<th scope="col" className="py-3 px-6">
 											keyword
 										</th>
-										<th scope="col" className="py-3 px-6 whitespace-pre" colSpan={3}>
-											text lines
+										<th scope="col" className="py-3 px-6 whitespace-pre" colSpan={1}>
+											headlines
+										</th>
+										<th scope="col" className="py-3 px-6 whitespace-pre" colSpan={1}>
+											textlines
 										</th>
 									</tr>
 								</thead>
 								<tbody>
-									{results.map((result, idx) => (
-										<tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-											{Object.keys(result).map((key, i) => (
-												<td className="py-4 px-6 whitespace-pre">{result[key]}</td>
-											))}
+									{results.map((item, idx) => (
+										<tr
+											key={idx}
+											className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+										>
+											<td className="py-4 px-6 whitespace-pre">{item.keyword}</td>
+											<td className="py-4 px-6 whitespace-pre">
+												{item.headlines.length
+													? item.headlines.map((headline, i) => <p key={i}>{headline}</p>)
+													: "-"}
+											</td>
+											<td className="py-4 px-6 whitespace-pre">
+												{item.descriptions.length
+													? item.descriptions.map((textline, i) => (
+															<p key={i}>{textline.replace('"', "")}</p>
+													  ))
+													: "-"}
+											</td>
 										</tr>
 									))}
 								</tbody>
@@ -168,59 +179,76 @@ export default function Home() {
 						<div className="grid">
 							<input
 								type="text"
-								value={itemsToGenerate.variations}
+								value={variations}
 								onChange={(e) => {
-									setItemsToGenerate({
-										...itemsToGenerate,
-										variations: e.target.value,
-									});
+									setVariations(e.target.value);
 								}}
 								className="ring-0 border-0 w-full focus:border-0 outline-none focus:outline-blue-600 outline-2 outline-offset-2 block p-2 rounded-md dark:bg-slate-700 dark:text-slate-200"
 							/>
 						</div>
-						{itemsToGenerate.items.map((item, idx) => (
-							<div key={idx} className="flex items-center justify-start">
-								<label className="flex items-center gap-2 dark:text-slate-200">
-									<Switch
-										checked={item.state}
-										onChange={() => {
-											const newItems = [...itemsToGenerate.items];
-											newItems[idx].state = !newItems[idx].state;
-											setItemsToGenerate({
-												...itemsToGenerate,
-												items: newItems,
-											});
-										}}
+						<div className="flex items-center justify-start">
+							<label className="flex items-center gap-2 dark:text-slate-200">
+								<Switch
+									checked={headline.state}
+									onChange={() => {
+										setHeadline({ ...headline, state: !headline.state });
+									}}
+									className={`${
+										headline.state ? "bg-blue-700" : "bg-gray-400 dark:bg-slate-500"
+									} relative inline-flex h-6 w-11 items-center rounded-full`}
+								>
+									<span
 										className={`${
-											item.state ? "bg-blue-700" : "bg-gray-400 dark:bg-slate-500"
-										} relative inline-flex h-6 w-11 items-center rounded-full`}
-									>
-										<span
-											className={`${
-												item.state ? "translate-x-6" : "translate-x-1"
-											} inline-block h-4 w-4 transform rounded-full bg-white transition`}
-										/>
-									</Switch>
-									<span>{item.type}</span>
-								</label>
-								<div className="flex-1 flex items-center justify-end">
-									<input
-										type="text"
-										value={item.length}
-										disabled={!item.state}
-										onChange={(e) => {
-											const newItems = [...itemsToGenerate.items];
-											newItems[idx].length = e.target.value;
-											setItemsToGenerate({
-												...itemsToGenerate,
-												items: newItems,
-											});
-										}}
-										className="ring-0 border-0 w-full focus:border-0 outline-none focus:outline-blue-600 outline-2 outline-offset-2 block max-w-[80px]  p-2 rounded-md dark:bg-slate-700 dark:text-slate-200 text-right disabled:text-slate-500 disabled:cursor-not-allowed"
+											headline.state ? "translate-x-6" : "translate-x-1"
+										} inline-block h-4 w-4 transform rounded-full bg-white transition`}
 									/>
-								</div>
+								</Switch>
+								<span>Google Ads headline</span>
+							</label>
+							<div className="flex-1 flex items-center justify-end">
+								<input
+									type="text"
+									value={headline.length}
+									disabled={!headline.state}
+									onChange={(e) => {
+										setHeadline({ ...headline, length: e.target.value });
+									}}
+									className="ring-0 border-0 w-full focus:border-0 outline-none focus:outline-blue-600 outline-2 outline-offset-2 block max-w-[80px]  p-2 rounded-md dark:bg-slate-700 dark:text-slate-200 text-right disabled:text-slate-500 disabled:cursor-not-allowed"
+								/>
 							</div>
-						))}
+						</div>
+
+						<div className="flex items-center justify-start">
+							<label className="flex items-center gap-2 dark:text-slate-200">
+								<Switch
+									checked={description.state}
+									onChange={() => {
+										setDescription({ ...description, state: !description.state });
+									}}
+									className={`${
+										description.state ? "bg-blue-700" : "bg-gray-400 dark:bg-slate-500"
+									} relative inline-flex h-6 w-11 items-center rounded-full`}
+								>
+									<span
+										className={`${
+											description.state ? "translate-x-6" : "translate-x-1"
+										} inline-block h-4 w-4 transform rounded-full bg-white transition`}
+									/>
+								</Switch>
+								<span>Google Ads description</span>
+							</label>
+							<div className="flex-1 flex items-center justify-end">
+								<input
+									type="text"
+									value={description.length}
+									disabled={!description.state}
+									onChange={(e) => {
+										setDescription({ ...description, length: e.target.value });
+									}}
+									className="ring-0 border-0 w-full focus:border-0 outline-none focus:outline-blue-600 outline-2 outline-offset-2 block max-w-[80px]  p-2 rounded-md dark:bg-slate-700 dark:text-slate-200 text-right disabled:text-slate-500 disabled:cursor-not-allowed"
+								/>
+							</div>
+						</div>
 					</div>
 					<div className="mt-4 flex items-center justify-start gap-4">
 						<button
