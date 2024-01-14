@@ -70,7 +70,7 @@ export default async function handler(req, res) {
 		if (env_var && env_var == "dev") {
 			return res.status(200).json({ status: "success", response: devResponse, filePath: `/files/${filename}` });
 		}
-		return res.status(200).json({ status: "success", response: devResponse });
+
 		const { keywords, headline, description, variations } = req.body;
 		const response = {
 			token: 0,
