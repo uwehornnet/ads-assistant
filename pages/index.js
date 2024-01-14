@@ -13,7 +13,7 @@ export default function Home() {
 	const [uploading, setUploading] = useState(false);
 
 	const [loading, setLoading] = useState(false);
-	const [placeholder, setPalceholder] = useState("prompt");
+	const [error, setError] = useState(null);
 
 	const [link, setLink] = useState(null);
 	const [results, setResults] = useState([]);
@@ -35,66 +35,76 @@ export default function Home() {
 	};
 
 	const fetchData = async () => {
-		if (loading) return;
-		setShowModal(false);
-		setLoading(true);
-		const res = await fetch(`${location.origin}/api/google/ads/get`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				keywords: keywords.split(","),
-				headline,
-				description,
-				variations,
-			}),
-		});
+		try {
+			if (loading) return;
+			setShowModal(false);
+			setLoading(true);
+			const res = await fetch(`${location.origin}/api/google/ads/get`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					keywords: keywords.split(","),
+					headline,
+					description,
+					variations,
+				}),
+			});
 
-		const data = await res.json();
-		setLink(data.filePath);
-		setResults(data.response.keywords);
+			const data = await res.json();
 
-		setLoading(false);
-	};
-
-	const placeholderLoop = () => {
-		const placeholders = ["prompt", "question", "query", "keywords", "topic"];
-
-		let i = 0;
-		setInterval(() => {
-			setPalceholder(placeholders[i]);
-			i++;
-			if (i === placeholders.length) i = 0;
-		}, 2000);
+			if (data.status == "error") {
+				setResults([]);
+				setError(data.message);
+				setLoading(false);
+				setTimeout(() => {
+					setError(null);
+				}, 3000);
+			} else {
+				setLink(data.filePath);
+				setResults(data.response.keywords);
+				setLoading(false);
+			}
+		} catch (error) {
+			setResults([]);
+			setError(error);
+			setLoading(false);
+		}
 	};
 
 	const handleUploadCSV = (e) => {
-		setUploading(true);
+		try {
+			setUploading(true);
 
-		const input = inputRef?.current;
-		const reader = new FileReader();
-		const [file] = input.files;
+			const input = inputRef?.current;
+			const reader = new FileReader();
+			const [file] = input.files;
 
-		reader.onloadend = ({ target }) => {
-			const csv = Papa.parse(target.result, { header: true });
-			const values = Object.values(csv.data)
-				.filter((item, idx) => idx > 2 && item.__parsed_extra && item.__parsed_extra[0] !== "-")
-				.map((item) => item.__parsed_extra[0].replace('"', ""));
+			reader.onloadend = ({ target }) => {
+				const csv = Papa.parse(target.result, { header: true });
+				const values = Object.values(csv.data)
+					.filter((item, idx) => idx > 2 && item.__parsed_extra && item.__parsed_extra[0] !== "-")
+					.map((item) => item.__parsed_extra[0].replace('"', ""));
 
-			setKeywords(values.join(", "));
-		};
+				setKeywords(values.join(", "));
+			};
 
-		reader.readAsText(file);
-		setUploading(false);
+			reader.readAsText(file);
+			setUploading(false);
+		} catch (error) {
+			setError(error);
+			setUploading(false);
+		}
 	};
-
-	useEffect(() => {
-		placeholderLoop();
-	}, []);
 
 	return (
 		<DefaultLayout>
+			{error && (
+				<div className="fixed top-0 left-0 md:right-2 md:top-2 md:left-auto w-full md:max-w-[400px] bg-red-300 border-t-4 border-red-600 z-[999] p-2 md:p-3 md:rounded-sm shadow-lg text-sm">
+					{error}
+				</div>
+			)}
 			<header className="bg-white dark:bg-slate-900 shadow">
 				<div className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8">
 					<div className="relative outline-none w-full">
@@ -106,7 +116,7 @@ export default function Home() {
 							value={keywords}
 							onChange={(e) => setKeywords(e.target.value)}
 							className="bg-slate-50 dark:bg-slate-800  backdrop-blur-md md:rounded-lg p-2 ring-0 border-0 w-full focus:border-0 outline-none focus:outline-blue-600 outline-2 outline-offset-4 placeholder-slate-800 dark:placeholder-slate-400 text-slate-800 dark:text-slate-400"
-							placeholder={`Add your ${placeholder} ... `}
+							placeholder={`Add your keywords here ... `}
 						></textarea>
 
 						<div className="md:absolute w-full bottom-[1px] left-0 ">

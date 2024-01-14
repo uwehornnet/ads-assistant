@@ -5,7 +5,7 @@ import OpenAI from "openai";
 import createCSV from "../../../../utils/createCSV";
 
 const openai = new OpenAI({
-	apiKey: process.env.REACT_APP_OPENAI_API_KEY || process.env.OPENAI_API_KEY,
+	apiKey: process.env.OPENAI_API_KEY || process.env.REACT_APP_OPENAI_API_KEY,
 });
 
 const devResponse = {
@@ -65,7 +65,7 @@ const fetchAPIResponse = async ({ prompt }) => {
 
 export default async function handler(req, res) {
 	try {
-		const env_var = process.env.REACT_APP_ENV_STATE || process.env.ENV_STATE;
+		const env_var = process.env.ENV_STATE || process.env.REACT_APP_ENV_STATE;
 		const filename = "google-ads.csv";
 		if (env_var && env_var == "dev") {
 			return res.status(200).json({ status: "success", response: devResponse, filePath: `/files/${filename}` });
