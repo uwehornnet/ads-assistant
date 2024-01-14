@@ -2,9 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 import OpenAI from "openai";
-
 import createCSV from "../../../../utils/createCSV";
-import { type } from "os";
 
 const openai = new OpenAI({
 	apiKey: process.env.OPENAI_API_KEY,
@@ -70,7 +68,7 @@ export default async function handler(req, res) {
 		if (process.env.ENV_STATE && process.env.ENV_STATE == "dev") {
 			return res.status(200).json({ status: "success", response: devResponse, filePath: `/files/${filename}` });
 		}
-
+		return res.status(200).json({ status: "success", response: devResponse });
 		const { keywords, headline, description, variations } = req.body;
 		const response = {
 			token: 0,
@@ -147,7 +145,6 @@ export default async function handler(req, res) {
 
 		return res.status(200).json({ status: "success", response, filePath: `/files/${filename}` });
 	} catch (error) {
-		console.log(error);
 		res.status(500).json({ status: "error", message: error.message });
 	}
 }
