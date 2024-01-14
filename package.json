@@ -12,6 +12,7 @@
 		"@headlessui/react": "^1.7.17",
 		"@heroicons/react": "^2.1.1",
 		"autoprefixer": "10.4.14",
+		"aws-sdk": "^2.1536.0",
 		"next": "13.4.7",
 		"openai": "^4.24.0",
 		"papaparse": "^5.4.1",
