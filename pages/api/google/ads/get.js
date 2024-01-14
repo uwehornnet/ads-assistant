@@ -68,7 +68,7 @@ const fetchAPIResponse = async ({ prompt }) => {
 export default async function handler(req, res) {
 	try {
 		if (process.env.ENV_STATE && process.env.ENV_STATE == "dev") {
-			return res.status(200).json({ status: "success", response: devResponse });
+			return res.status(200).json({ status: "success", response: devResponse, filePath: `/files/${filename}` });
 		}
 
 		const { keywords, headline, description, variations } = req.body;
@@ -111,68 +111,41 @@ export default async function handler(req, res) {
 				}
 
 				const res = await fetchAPIResponse({ prompt });
-				console.log({ res });
-				const descriptionArray = res.message.content.split("\n").map((item) => {
-					return item.replace(/[0-9]/g, "").replace(". ", "").replace('"', "");
-				});
 
+				const descriptionArray = res.message.content.split("\n").map((item) => {
+					return item
+						.trim()
+						.replace(/[0-9]/g, "")
+						.replace(/(\r\n|\n|\r)/gm, "")
+						.replace('"\n', "")
+						.replace(". ", "")
+						.replace('"', "");
+				});
 				response.keywords.filter((item) => item.keyword == keyword)[0].descriptions = [...descriptionArray];
 				response.token += res.usage;
 			}
 		}
 
-		return res.status(200).json({ status: "success", response });
+		const csvResponse = [];
+		for (const item of response.keywords) {
+			const obj = {
+				keyword: item.keyword,
+			};
+			for (let i = 0; i < item.headlines.length; i++) {
+				obj[`headline_${i + 1}`] = item.headlines[i];
+			}
+			for (let i = 0; i < item.descriptions.length; i++) {
+				obj[`description_${i + 1 + item.headlines.length}`] = item.descriptions[i];
+			}
+			csvResponse.push(obj);
+		}
 
+		const csv = createCSV(csvResponse);
 		const filename = "google-ads.csv";
 		const file = path.join(process.cwd(), "public/files", filename);
+		const csvFile = fs.writeFileSync(file, csv);
 
-		// const keywords = params.split(",");
-		// const apiResponse = await Promise.all(
-		// 	keywords.map(async (keyword) => {
-		// 		const apiResponse = await fetchAPIResponse({ keyword, length });
-		// 		const apiResponseArray = apiResponse.content.split("\n").map((item) => {
-		// 			const arr = item.split('"');
-		// 			return arr[1];
-		// 		});
-
-		// 		const resObject = {};
-
-		// 		for (let i = 0; i < apiResponseArray.length; i++) {
-		// 			resObject[`google_ads_${i + 1}`] = apiResponseArray[i];
-		// 		}
-
-		// 		return {
-		// 			keyword,
-		// 			...resObject,
-		// 		};
-		// 	})
-		// );
-		const apiResponse = [
-			{
-				keyword: "apple air tags",
-				google_ads_1: "Find lost items",
-				google_ads_2: "Track with ease",
-				google_ads_3: "Never lose again",
-			},
-			{
-				keyword: " iqos",
-				google_ads_1: "IQOS: Smoke-Free Alternative",
-				google_ads_2: "Discover IQOS: Better Choice",
-				google_ads_3: "Switch to IQOS: Enjoy Freedom",
-			},
-			{
-				keyword: " health insurrance",
-				google_ads_1: "Save on Health Insurance!",
-				google_ads_2: "Get Affordable Coverage",
-				google_ads_3: "Compare Health Plans",
-			},
-		];
-
-		const csv = createCSV(apiResponse);
-		//const csvFile = fs.writeFileSync(file, csv);
-		setTimeout(() => {
-			res.status(200).json({ status: "success", results: apiResponse, filepath: `/files/${filename}` });
-		}, 4000);
+		return res.status(200).json({ status: "success", response, filePath: `/files/${filename}` });
 	} catch (error) {
 		console.log(error);
 		res.status(500).json({ status: "error", message: error.message });
