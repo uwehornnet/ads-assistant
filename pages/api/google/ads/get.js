@@ -183,7 +183,7 @@ export default async function handler(req, res) {
 
 		const csv = createCSV(csvResponse);
 
-		const upload = uploadToS3(csv);
+		const upload = await uploadToS3(csv);
 
 		return res.status(200).json({ status: "success", response, filePath: upload?.Location });
 	} catch (error) {
