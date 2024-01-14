@@ -88,9 +88,8 @@ const uploadToS3 = async (csv) => {
 export default async function handler(req, res) {
 	try {
 		const env_var = process.env.ENV_STATE || process.env.REACT_APP_ENV_STATE;
-
+		const filename = "google-ads.csv";
 		if (env_var && env_var == "dev") {
-			const filename = "google-ads.csv";
 			const csvResponse = [];
 			for (const item of devResponse.keywords) {
 				const obj = {
@@ -186,7 +185,7 @@ export default async function handler(req, res) {
 
 		const upload = uploadToS3(csv);
 
-		return res.status(200).json({ status: "success", response, filePath: `/files/${filename}` });
+		return res.status(200).json({ status: "success", response, filePath: upload?.Location });
 	} catch (error) {
 		res.status(500).json({ status: "error", message: error.message });
 	}
