@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import Image from "next/image";
+import { useEffect, useState, useRef } from "react";
+import Papa from "papaparse";
 
 import { Inter } from "next/font/google";
 import DefaultLayout from "@/layouts/Default";
@@ -9,6 +9,9 @@ import { Switch } from "@headlessui/react";
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
+	const inputRef = useRef();
+	const [uploading, setUploading] = useState(false);
+
 	const [loading, setLoading] = useState(false);
 	const [placeholder, setPalceholder] = useState("prompt");
 
@@ -66,6 +69,26 @@ export default function Home() {
 		}, 2000);
 	};
 
+	const handleUploadCSV = (e) => {
+		setUploading(true);
+
+		const input = inputRef?.current;
+		const reader = new FileReader();
+		const [file] = input.files;
+
+		reader.onloadend = ({ target }) => {
+			const csv = Papa.parse(target.result, { header: true });
+			const values = Object.values(csv.data)
+				.filter((item, idx) => idx > 2 && item.__parsed_extra && item.__parsed_extra[0] !== "-")
+				.map((item) => item.__parsed_extra[0].replace('"', ""));
+
+			setKeywords(values.join(", "));
+		};
+
+		reader.readAsText(file);
+		setUploading(false);
+	};
+
 	useEffect(() => {
 		placeholderLoop();
 	}, []);
@@ -88,27 +111,34 @@ export default function Home() {
 
 						<div className="md:absolute w-full bottom-[1px] left-0 ">
 							<div className="flex flex-col sm:flex-row gap-4 items-center justify-end p-2 ">
-								<button
-									disabled
-									onClick={() => {}}
-									className="text-blue-400 p-2 flex items-center gap-2 disabled:text-slate-700 disabled:cursor-not-allowed bg-slate-100 rounded-md"
-								>
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										fill="none"
-										viewBox="0 0 24 24"
-										strokeWidth={2.5}
-										stroke="currentColor"
-										className="w-4 h-4"
-									>
-										<path
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
-										/>
-									</svg>
-									<span>upload file</span>
-								</button>
+								<label>
+									<span className="text-blue-400 p-2 flex items-center gap-2 disabled:text-slate-700 disabled:cursor-not-allowed bg-slate-100 rounded-md cursor-pointer">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											fill="none"
+											viewBox="0 0 24 24"
+											strokeWidth={2.5}
+											stroke="currentColor"
+											className="w-4 h-4"
+										>
+											<path
+												strokeLinecap="round"
+												strokeLinejoin="round"
+												d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
+											/>
+										</svg>
+										<span>upload file</span>
+									</span>
+									<input
+										ref={inputRef}
+										disabled={uploading}
+										className="hidden"
+										id="multiple_files"
+										type="file"
+										multiple
+										onChange={handleUploadCSV}
+									/>
+								</label>
 								<button
 									onClick={() => toggleModal(true)}
 									className="bg-blue-700 text-white rounded-md py-2 px-6 disabled:hover:bg-blue-500 disabled:cursor-not-allowed"

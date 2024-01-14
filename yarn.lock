@@ -648,6 +648,11 @@ openai@^4.24.0:
     node-fetch "^2.6.7"
     web-streams-polyfill "^3.2.1"
 
+papaparse@^5.4.1:
+  version "5.4.1"
+  resolved "https://registry.npmjs.org/papaparse/-/papaparse-5.4.1.tgz"
+  integrity sha512-HipMsgJkZu8br23pW15uvo6sib6wne/4woLZPlFf3rpDyMe9ywEXUsuD7+6K9PRkJlVT51j/sCOYDKGGS3ZJrw==
+
 path-is-absolute@^1.0.0:
   version "1.0.1"
   resolved "https://registry.npmjs.org/path-is-absolute/-/path-is-absolute-1.0.1.tgz"
