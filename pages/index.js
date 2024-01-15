@@ -45,33 +45,32 @@ export default function Home() {
 			if (loading) return;
 			setShowModal(false);
 			setLoading(true);
-			const res = await fetch(`${location.origin}/api/google/ads/get`, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					keywords: keywords.split(","),
-					headline,
-					description,
-					variations,
-				}),
-			});
-
-			const data = await res.json();
-
-			if (data.status == "error") {
-				setResults([]);
-				setError(data.message);
-				setLoading(false);
-				setTimeout(() => {
-					setError(null);
-				}, 3000);
-			} else {
-				setLink(data.filePath);
-				setResults(data.response.keywords);
-				setLoading(false);
+			setResults([]);
+			const keywordArray = keywords.split(",");
+			for (let i = 0; i < keywordArray.length; i++) {
+				const keyword = keywordArray[i];
+				const req = await fetch(`${location.origin}/api/google/ads/get`, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						keywords: [keyword],
+						headline,
+						description,
+						variations,
+					}),
+				});
+				const res = await req.json();
+				if (res.status == "error") {
+					setError(data.message);
+					setTimeout(() => {
+						setError(null);
+					}, 3000);
+				}
+				setResults((prev) => [...prev, ...res.response.keywords]);
 			}
+			setLoading(false);
 		} catch (error) {
 			setResults([]);
 			setError(error);
@@ -210,7 +209,7 @@ export default function Home() {
 					</div>
 				</div>
 			</header>
-			<main className="relative">
+			<main className="relative pb-16">
 				{results.length ? (
 					<div className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8 overflow-x-auto relative ">
 						<div className="overflow-x-auto relative shadow-md sm:rounded-lg">
@@ -351,13 +350,13 @@ export default function Home() {
 				</>
 			</Modal>
 
-			{results.length && (
-				<div className="fixed bottom-0 left-0 w-full dark:text-slate-300">
+			{results.length && !loading ? (
+				<div className="fixed bottom-0 left-0 w-full dark:text-slate-300 bg-white dark:bg-slate-800">
 					<div className="container mx-auto flex items-center justify-center gap-4 p-2 text-sm">
 						<p>We have generated your suggestions. You can download them as csv: </p>
 						<span
 							onClick={getCSVFile}
-							className="bg-blue-700 text-white rounded-md py-2 px-6 disabled:hover:bg-blue-500 disabled:cursor-not-allowed flex items-center gap-2"
+							className="bg-blue-700 cursor-pointer text-white rounded-md py-2 px-6 disabled:hover:bg-blue-500 disabled:cursor-not-allowed flex items-center gap-2"
 						>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
@@ -378,7 +377,7 @@ export default function Home() {
 						</span>
 					</div>
 				</div>
-			)}
+			) : null}
 		</DefaultLayout>
 	);
 }
