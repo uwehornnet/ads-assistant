@@ -1,9 +1,4 @@
-const fs = require("fs");
-const path = require("path");
-const AWS = require("aws-sdk");
-
 import OpenAI from "openai";
-import createCSV from "../../../../utils/createCSV";
 
 const openai = new OpenAI({
 	apiKey: process.env.OPENAI_API_KEY || process.env.REACT_APP_OPENAI_API_KEY,
@@ -64,52 +59,12 @@ const fetchAPIResponse = async ({ prompt }) => {
 	};
 };
 
-const uploadToS3 = async (csv) => {
-	try {
-		const filename = `${Date.now()}.csv`;
-		const s3 = new AWS.S3({
-			accessKeyId: process.env.NEXT_AWS_ACCESS_KEY_ID || process.env.REACT_APP_AWS_ACCESS_KEY_ID,
-			secretAccessKey: process.env.NEXT_AWS_SECRET_ACCESS_KEY || process.env.REACT_APP_AWS_SECRET_ACCESS_KEY,
-			region: "eu-central-1",
-		});
-
-		const params = {
-			Bucket: "adsassistant",
-			Key: filename,
-			Body: csv,
-		};
-
-		return await s3.upload(params).promise();
-	} catch (error) {
-		console.log(error);
-	}
-};
-
 export default async function handler(req, res) {
 	try {
 		const env_var = process.env.ENV_STATE || process.env.REACT_APP_ENV_STATE;
 		const filename = "google-ads.csv";
 		if (env_var && env_var == "dev") {
-			const csvResponse = [];
-			for (const item of devResponse.keywords) {
-				const obj = {
-					keyword: item.keyword,
-				};
-				for (let i = 0; i < item.headlines.length; i++) {
-					obj[`headline_${i + 1}`] = item.headlines[i];
-				}
-				for (let i = 0; i < item.descriptions.length; i++) {
-					obj[`description_${i + 1 + item.headlines.length}`] = item.descriptions[i];
-				}
-				csvResponse.push(obj);
-			}
-			const csv = createCSV(csvResponse);
-			const data = await uploadToS3(csv);
-
-			if (data.error) {
-				return res.status(500).json({ status: "error", message: data?.error });
-			}
-			return res.status(200).json({ status: "success", response: devResponse, filePath: data?.Location });
+			return res.status(200).json({ status: "success", response: devResponse });
 		}
 
 		const { keywords, headline, description, variations } = req.body;
@@ -167,25 +122,7 @@ export default async function handler(req, res) {
 			}
 		}
 
-		const csvResponse = [];
-		for (const item of response.keywords) {
-			const obj = {
-				keyword: item.keyword,
-			};
-			for (let i = 0; i < item.headlines.length; i++) {
-				obj[`headline_${i + 1}`] = item.headlines[i];
-			}
-			for (let i = 0; i < item.descriptions.length; i++) {
-				obj[`description_${i + 1 + item.headlines.length}`] = item.descriptions[i];
-			}
-			csvResponse.push(obj);
-		}
-
-		const csv = createCSV(csvResponse);
-
-		const upload = await uploadToS3(csv);
-
-		return res.status(200).json({ status: "success", response, filePath: upload?.Location });
+		return res.status(200).json({ status: "success", response });
 	} catch (error) {
 		res.status(500).json({ status: "error", message: error.message });
 	}

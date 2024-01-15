@@ -1,14 +1,20 @@
+"use client";
+
 import { useEffect, useState, useRef } from "react";
+import { useSession, signIn, signOut } from "next-auth/react";
+import { useRouter } from "next/router";
+
 import Papa from "papaparse";
 
-import { Inter } from "next/font/google";
-import DefaultLayout from "@/layouts/Default";
 import Modal from "@/components/Modal";
 import { Switch } from "@headlessui/react";
 
-
+import DefaultLayout from "@/layouts/Default";
 
 export default function Home() {
+	const router = useRouter();
+	const { data: session } = useSession();
+
 	const inputRef = useRef();
 	const [uploading, setUploading] = useState(false);
 
@@ -97,6 +103,42 @@ export default function Home() {
 			setUploading(false);
 		}
 	};
+
+	const getCSVFile = async () => {
+		try {
+			const res = await fetch(`${location.origin}/api/google/ads/upload`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					data: results,
+				}),
+			});
+
+			const data = await res.json();
+
+			if (data.status == "error") {
+				setError(data.message);
+				setTimeout(() => {
+					setError(null);
+				}, 3000);
+			} else {
+				window.open(data.location, "_blank");
+			}
+		} catch (error) {
+			console.log(error);
+			setError(error);
+		}
+	};
+
+	// useEffect(() => {
+	// 	if (!session) {
+	// 		router.push({
+	// 			pathname: "/auth/login",
+	// 		});
+	// 	}
+	// }, []);
 
 	return (
 		<DefaultLayout>
@@ -309,12 +351,12 @@ export default function Home() {
 				</>
 			</Modal>
 
-			{link && (
+			{results.length && (
 				<div className="fixed bottom-0 left-0 w-full dark:text-slate-300">
 					<div className="container mx-auto flex items-center justify-center gap-4 p-2 text-sm">
 						<p>We have generated your suggestions. You can download them as csv: </p>
-						<a
-							href={link}
+						<span
+							onClick={getCSVFile}
 							className="bg-blue-700 text-white rounded-md py-2 px-6 disabled:hover:bg-blue-500 disabled:cursor-not-allowed flex items-center gap-2"
 						>
 							<svg
@@ -333,7 +375,7 @@ export default function Home() {
 							</svg>
 
 							<span className="text-sm">download</span>
-						</a>
+						</span>
 					</div>
 				</div>
 			)}
