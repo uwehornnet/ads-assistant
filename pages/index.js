@@ -88,9 +88,14 @@ export default function Home() {
 
 			reader.onloadend = ({ target }) => {
 				const csv = Papa.parse(target.result, { header: true });
+
 				const values = Object.values(csv.data)
-					.filter((item, idx) => idx > 2 && item.__parsed_extra && item.__parsed_extra[0] !== "-")
-					.map((item) => item.__parsed_extra[0].replace('"', ""));
+					.filter((item) => {
+						return Object.values(item)[0] !== "-";
+					})
+					.map((item) => {
+						return Object.values(item)[0];
+					});
 
 				setKeywords(values.join(", "));
 			};
