@@ -46,30 +46,26 @@ export default function Home() {
 			setShowModal(false);
 			setLoading(true);
 			setResults([]);
-			const keywordArray = keywords.split(",");
-			for (let i = 0; i < keywordArray.length; i++) {
-				const keyword = keywordArray[i];
-				const req = await fetch(`${location.origin}/api/google/ads/get`, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({
-						keywords: [keyword],
-						headline,
-						description,
-						variations,
-					}),
-				});
-				const res = await req.json();
-				if (res.status == "error") {
-					setError(data.message);
-					setTimeout(() => {
-						setError(null);
-					}, 3000);
-				}
-				setResults((prev) => [...prev, ...res.response.keywords]);
+			const req = await fetch(`${location.origin}/api/google/ads/get`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					keywords: keywords.split(","),
+					headline,
+					description,
+					variations,
+				}),
+			});
+			const res = await req.json();
+			if (res.status == "error") {
+				setError(data.message);
+				setTimeout(() => {
+					setError(null);
+				}, 3000);
 			}
+			setResults((prev) => [...prev, ...res.response.keywords]);
 			setLoading(false);
 		} catch (error) {
 			setResults([]);
