@@ -5,43 +5,6 @@ const openai = new OpenAI({
 	apiKey: process.env.OPENAI_API_KEY || process.env.REACT_APP_OPENAI_API_KEY,
 });
 
-const devResponse = {
-	token: 635,
-	keywords: [
-		{
-			keyword: "airbag steering wheels",
-			headlines: ["Safe Drive, Airbag Wheels", "Secure Ride, Airbag Tech", "Protective Drive, Airbags"],
-			descriptions: [
-				"Safe Drive, Airbag Wheels: Upgrade your vehicle's safety with our advanced airbag steering wheels.\"",
-				'Secure Ride, Airbag Tech: Experience peace of mind on the road with our cutting-edge airbag steering wheels."',
-				'Protective Drive, Airbags: Stay protected and confident with our reliable airbag steering wheels."',
-			],
-		},
-		{
-			keyword: " battery garden sparyer",
-			headlines: ["Powerful Garden Sprayer", "Efficient Battery Sprayer", "Easy-To-Use Sprayer"],
-			descriptions: [
-				"Powerful Garden Sprayer: Maximize Your Yard's Potential\"",
-				'Efficient Battery Sprayer: Get More Done in Less Time"',
-				'Easy-To-Use Sprayer: Simplify Your Gardening Experience"',
-			],
-		},
-		{
-			keyword: " exhaust resonator pipe",
-			headlines: [
-				"Boost Performance: Resonator Pipe",
-				"Enhance Sound: Resonator Pipe",
-				"Unleash Power: Resonator Pipe",
-			],
-			descriptions: [
-				'Boost Performance: Resonator Pipe - Experience Unmatched Power!"',
-				'Enhance Sound: Resonator Pipe - Unleash the Roar of Your Engine!"',
-				'Unleash Power: Resonator Pipe - Maximize Performance & Dominate the Road!"',
-			],
-		},
-	],
-};
-
 const fetchAPIResponse = async ({ prompt }) => {
 	const response = await openai.chat.completions.create({
 		messages: [
@@ -71,7 +34,11 @@ export default async function handler(req, res) {
 				done: false,
 			},
 		});
-		return res.status(200).json({ status: "success", queue });
+
+		if (!queue) {
+			return res.status(200).json({ status: "success", message: null });
+		}
+
 		/**
 		 * if queue id is present, get keywords from job table filtered by queue id
 		 */
@@ -80,13 +47,28 @@ export default async function handler(req, res) {
 				queueId: queue.uid,
 			},
 		});
-		return res.status(200).json({ status: "success", job });
+
 		const { keywords: allKeywords, headline, description, variations } = JSON.parse(queue.content);
-		const keywords = [allKeywords[jobs.length]];
+
+		/**
+		 * if keyword length == job length, update queue as done and return
+		 */
+		if (allKeywords.length === jobs.length) {
+			const updatedQueue = await prisma.queue.update({
+				where: {
+					uid: queue.uid,
+				},
+				data: {
+					done: true,
+				},
+			});
+			return res.status(200).json({ status: "success", message: "All jobs are done" });
+		}
 
 		/**
 		 * prepare response object
 		 */
+
 		const response = {
 			token: 0,
 			keywords: [],
@@ -95,6 +77,7 @@ export default async function handler(req, res) {
 		/**
 		 * prepare response object with keywords
 		 */
+		const keywords = [allKeywords[jobs.length]];
 		for (const keyword of keywords) {
 			response.keywords.push({
 				keyword,
