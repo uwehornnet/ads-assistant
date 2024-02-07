@@ -105,7 +105,7 @@ export default function Job({ queue, jobs }) {
 					<div className=" mt-4">
 						<p className="text-slate-600 dark:text-slate-300">Queue: {queue.id}</p>
 						<div className="rounded-md bg-slate-200 dark:bg-slate-800 p-2 mt-2">
-							<div className=" grid grid-cols-1 md:grid-cols-3 text-slate-400">
+							<div className=" grid grid-cols-1 md:grid-cols-3 gap-4 text-slate-400">
 								<div className="col-span-1">
 									<small className="block text-xs uppercase font-bold text-slate-500">
 										created ad
@@ -117,29 +117,18 @@ export default function Job({ queue, jobs }) {
 										Jobs done
 									</small>
 									<span>{jobs ? `${jobs.length} / ${queue.content.keywords.length}` : "-"}</span>
+									<span className="block w-full h-1 bg-slate-300/50 dark:bg-slate-400/50 relative mt-2">
+										<div
+											className="absolute left-0 top-0 h-full bg-blue-600"
+											style={{
+												width: `${(100 / queue.content.keywords.length) * jobs.length}%`,
+											}}
+										></div>
+									</span>
 								</div>
 								<div className="col-span-1">
 									<small className="block text-xs uppercase font-bold text-slate-500">Status</small>
 									<span>{queue.done ? "done" : "pending"}</span>
-								</div>
-							</div>
-
-							<div className=" grid grid-cols-1 md:grid-cols-3 text-slate-400 mt-4">
-								<div className="col-span-1">
-									<small className="block text-xs uppercase font-bold text-slate-500">
-										Variations
-									</small>
-									<span>{queue.content?.variations}</span>
-								</div>
-								<div className="col-span-1">
-									<small className="block text-xs uppercase font-bold text-slate-500">Headline</small>
-									<span>{queue.content?.headline.length} Token</span>
-								</div>
-								<div className="col-span-1">
-									<small className="block text-xs uppercase font-bold text-slate-500">
-										Description
-									</small>
-									<span>{queue.content?.description.length} Token</span>
 								</div>
 							</div>
 
@@ -154,7 +143,7 @@ export default function Job({ queue, jobs }) {
 				)}
 
 				{jobs && jobs.length > 0 ? (
-					<div className=" mt-4">
+					<div className=" my-4">
 						<p className="text-slate-600 dark:text-slate-300">Jobs</p>
 						<ul className="flex flex-col gap-2 mt-2">
 							{jobs.map((job) => (
@@ -162,7 +151,7 @@ export default function Job({ queue, jobs }) {
 									key={job.id}
 									className="rounded-md bg-slate-200 dark:bg-slate-800 p-2 text-slate-400"
 								>
-									<div className="grid grid-cols-3 gap-4">
+									<div className="grid grid-cols-4 gap-4">
 										<div>
 											<small className="block text-xs uppercase font-bold text-slate-500">
 												created ad
@@ -188,6 +177,12 @@ export default function Job({ queue, jobs }) {
 										</div>
 										<div>
 											<small className="block text-xs uppercase font-bold text-slate-500">
+												Keyword
+											</small>
+											<span>{job.content?.keywords[0].keyword}</span>
+										</div>
+										<div>
+											<small className="block text-xs uppercase font-bold text-slate-500">
 												Token used
 											</small>
 											<span>{job.content.token}</span>
@@ -199,9 +194,6 @@ export default function Job({ queue, jobs }) {
 											<table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
 												<thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
 													<tr>
-														<th scope="col" className="py-3 px-6">
-															keyword
-														</th>
 														<th
 															scope="col"
 															className="py-3 px-6 whitespace-pre"
@@ -224,7 +216,6 @@ export default function Job({ queue, jobs }) {
 															key={idx}
 															className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
 														>
-															<td className="py-4 px-6 whitespace-pre">{item.keyword}</td>
 															<td className="py-4 px-6 whitespace-pre">
 																{item.headlines.length
 																	? item.headlines.map((headline, i) => (
