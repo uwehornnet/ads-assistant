@@ -12,6 +12,7 @@
 	"dependencies": {
 		"@headlessui/react": "^1.7.17",
 		"@heroicons/react": "^2.1.1",
+		"@prisma/adapter-pg": "^5.9.1",
 		"@prisma/client": "5.9.1",
 		"@vercel/postgres": "^0.7.2",
 		"autoprefixer": "10.4.14",
