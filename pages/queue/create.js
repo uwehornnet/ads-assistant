@@ -10,6 +10,7 @@ import Modal from "@/components/Modal";
 import { Switch } from "@headlessui/react";
 
 import DefaultLayout from "@/layouts/Default";
+import ActivityIndicator from "@/components/ActivityIndicator";
 
 export default function Queue() {
 	const router = useRouter();
@@ -196,15 +197,7 @@ export default function Queue() {
 									onClick={() => toggleModal(true)}
 									className="bg-blue-700 text-white rounded-md py-2 px-6 disabled:hover:bg-blue-500 disabled:cursor-not-allowed"
 								>
-									{loading ? (
-										<div className="flex space-x-1 justify-center items-center py-2">
-											<div className="h-2 w-2 bg-white rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-											<div className="h-2 w-2 bg-white rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-											<div className="h-2 w-2 bg-white rounded-full animate-bounce"></div>
-										</div>
-									) : (
-										<span>generate suggestions</span>
-									)}
+									{loading ? <ActivityIndicator /> : <span>generate suggestions</span>}
 								</button>
 							</div>
 						</div>

@@ -1,6 +1,6 @@
 const AWS = require("aws-sdk");
 
-import createCSV from "../../../../utils/createCSV";
+
 
 const uploadToS3 = async (csv) => {
 	try {

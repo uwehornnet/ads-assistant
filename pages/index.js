@@ -9,10 +9,28 @@ import DefaultLayout from "../layouts/Default";
 import prisma from "../lib/prisma";
 
 export default function Home(props) {
-	const { queues } = props;
+	const [queues, setQueues] = useState([]);
 	const [error, setError] = useState(null);
-	const router = useRouter();
+
 	const { data: session } = useSession();
+
+	const fetchQueues = async () => {
+		try {
+			const res = await fetch(`/api/queues/get`);
+			const data = await res.json();
+			if (data.status === "error") {
+				setError(data.message);
+			} else {
+				setQueues(data.message);
+			}
+		} catch (error) {
+			setError(error.message);
+		}
+	};
+
+	useEffect(() => {
+		fetchQueues();
+	}, []);
 
 	return (
 		<DefaultLayout>
@@ -52,24 +70,4 @@ export default function Home(props) {
 			</main>
 		</DefaultLayout>
 	);
-}
-
-export async function getStaticProps() {
-	try {
-		const queues = await prisma.queue.findMany();
-		const res = queues.map((queue) => {
-			return {
-				id: queue.id,
-				uid: queue.uid,
-				done: queue.done,
-				createdAt: new Date(queue.createdAt).toString(),
-			};
-		});
-
-		return {
-			props: { queues: res },
-		};
-	} catch (error) {
-		console.error(error);
-	}
 }
