@@ -193,7 +193,9 @@ export default function Job() {
 				</ul>
 				{queue && (
 					<div className=" mt-4">
-						<p className="text-slate-600 dark:text-slate-300">Queue: {queue.id}</p>
+						<p className="text-slate-600 dark:text-slate-300">
+							ID: {queue.id} | UID: {queue.uid}
+						</p>
 						<div className="rounded-md bg-slate-200 dark:bg-slate-800 p-2 mt-2">
 							<div className=" grid grid-cols-1 md:grid-cols-3 gap-4 text-slate-400">
 								<div className="col-span-1">

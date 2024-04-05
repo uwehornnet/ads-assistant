@@ -65,6 +65,25 @@ export default function Queue() {
 					setError(null);
 				}, 3000);
 			}
+
+			/**
+			 * init inngest event with the queue id
+			 */
+			const id = res.queue.uid;
+			const event = await fetch(`${location.origin}/api/inngest/event?id=${id}`, {
+				method: "GET",
+			});
+			const data = await event.json();
+			if (data.status == "error") {
+				setError(data.message);
+				setTimeout(() => {
+					setError(null);
+				}, 3000);
+			}
+
+			/**
+			 * return to dashboard
+			 */
 			setLoading(false);
 			router.push({
 				pathname: "/",

@@ -20,11 +20,17 @@ export default function Home(props) {
 			const data = await res.json();
 			if (data.status === "error") {
 				setError(data.message);
+				setTimeout(() => {
+					setError(null);
+				}, 3000);
 			} else {
 				setQueues(data.message);
 			}
 		} catch (error) {
 			setError(error.message);
+			setTimeout(() => {
+				setError(null);
+			}, 3000);
 		}
 	};
 
