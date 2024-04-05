@@ -83,7 +83,7 @@ export default function Queue() {
 			 */
 			setLoading(false);
 			router.push({
-				pathname: "/",
+				pathname: "/dashboard/",
 			});
 		} catch (error) {
 			setResults([]);

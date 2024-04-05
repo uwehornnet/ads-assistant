@@ -123,7 +123,7 @@ export default function Job() {
 					setError(null);
 				}, 10000);
 			} else {
-				router.push("/");
+				router.push("/dashboard/");
 			}
 		} catch (error) {
 			console.log(error);
@@ -140,13 +140,6 @@ export default function Job() {
 	useEffect(() => {
 		if (!queue) return;
 		fetchJobs();
-
-		// const intervalId = setInterval(() => {
-		// 	//fetchJobs();
-		// }, 10000);
-		// return () => {
-		// 	clearInterval(intervalId);
-		// };
 	}, [queue]);
 
 	return (
@@ -160,7 +153,7 @@ export default function Job() {
 			<main className="container mx-auto ">
 				<ul className="flex items-center justify-start gap-2 mt-2 text-xs">
 					<li className="bg-slate-200 dark:bg-slate-800 rounded-md flex items-center justify-center text-slate-400">
-						<a href="/">
+						<a href="/dashboard">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								viewBox="0 0 20 20"
