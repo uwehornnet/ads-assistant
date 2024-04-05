@@ -40,7 +40,7 @@ export default function Dashboard(props) {
 				</div>
 			)}
 
-			<main className="container mx-auto">
+			<main className="container mx-auto px-4">
 				{queues && (
 					<ul className="mt-4">
 						{queues.map((queue) => (

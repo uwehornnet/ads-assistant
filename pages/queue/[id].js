@@ -150,7 +150,7 @@ export default function Job() {
 				</div>
 			)}
 
-			<main className="container mx-auto ">
+			<main className="container mx-auto px-4">
 				<ul className="flex items-center justify-start gap-2 mt-2 text-xs">
 					<li className="bg-slate-200 dark:bg-slate-800 rounded-md flex items-center justify-center text-slate-400">
 						<a href="/dashboard">

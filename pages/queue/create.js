@@ -23,7 +23,6 @@ export default function Queue() {
 	const [results, setResults] = useState([]);
 	const [showModal, setShowModal] = useState(false);
 
-	const [variations, setVariations] = useState(3);
 	const [keywords, setKeywords] = useState("airbag steering wheels, battery garden sparyer, exhaust resonator pipe");
 	const [headline, setHeadline] = useState({
 		state: true,
@@ -52,7 +51,6 @@ export default function Queue() {
 					keywords: keywords.split(","),
 					headline,
 					description,
-					variations,
 				}),
 			});
 			const res = await req.json();
@@ -158,7 +156,7 @@ export default function Queue() {
 				</div>
 			)}
 			<header className="bg-white dark:bg-slate-900 shadow">
-				<div className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8">
+				<div className="mx-auto container p-4">
 					<div className="relative outline-none w-full">
 						<textarea
 							name="prompt"
@@ -260,16 +258,6 @@ export default function Queue() {
 			<Modal isOpen={showModal} toggle={toggleModal}>
 				<>
 					<div className="flex flex-col gap-2 my-8">
-						<div className="grid">
-							<input
-								type="text"
-								value={variations}
-								onChange={(e) => {
-									setVariations(e.target.value);
-								}}
-								className="ring-0 border-0 w-full focus:border-0 outline-none focus:outline-blue-600 outline-2 outline-offset-2 block p-2 rounded-md dark:bg-slate-700 dark:text-slate-200"
-							/>
-						</div>
 						<div className="flex items-center justify-start">
 							<label className="flex items-center gap-2 dark:text-slate-200">
 								<Switch
