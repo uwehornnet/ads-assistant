@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/router";
 
 import Papa from "papaparse";
@@ -9,12 +8,11 @@ import Papa from "papaparse";
 import Modal from "@/components/Modal";
 import { Switch } from "@headlessui/react";
 
-import DefaultLayout from "@/layouts/Default";
+import DashboardLayout from "@/layouts/Dashboard";
 import ActivityIndicator from "@/components/ActivityIndicator";
 
 export default function Queue() {
 	const router = useRouter();
-	const { data: session } = useSession();
 
 	const inputRef = useRef();
 	const [uploading, setUploading] = useState(false);
@@ -22,7 +20,6 @@ export default function Queue() {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
 
-	const [link, setLink] = useState(null);
 	const [results, setResults] = useState([]);
 	const [showModal, setShowModal] = useState(false);
 
@@ -153,16 +150,8 @@ export default function Queue() {
 		}
 	};
 
-	// useEffect(() => {
-	// 	if (!session) {
-	// 		router.push({
-	// 			pathname: "/auth/login",
-	// 		});
-	// 	}
-	// }, []);
-
 	return (
-		<DefaultLayout>
+		<DashboardLayout>
 			{error && (
 				<div className="fixed top-0 left-0 md:right-2 md:top-2 md:left-auto w-full md:max-w-[400px] bg-red-300 border-t-4 border-red-600 z-[999] p-2 md:p-3 md:rounded-sm shadow-lg text-sm">
 					{error}
@@ -392,6 +381,6 @@ export default function Queue() {
 					</div>
 				</div>
 			) : null}
-		</DefaultLayout>
+		</DashboardLayout>
 	);
 }

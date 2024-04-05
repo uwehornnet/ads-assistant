@@ -1,97 +1,45 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 
 import DefaultLayout from "../layouts/Default";
 
-import prisma from "../lib/prisma";
-
-export default function Home(props) {
-	const [queues, setQueues] = useState([]);
-	const [error, setError] = useState(null);
-
+export default function Home() {
+	const router = useRouter();
 	const { data: session } = useSession();
-
-	const fetchQueues = async () => {
-		try {
-			const res = await fetch(`/api/queues/get`);
-			const data = await res.json();
-			if (data.status === "error") {
-				setError(data.message);
-				setTimeout(() => {
-					setError(null);
-				}, 3000);
-			} else {
-				setQueues(data.message);
-			}
-		} catch (error) {
-			setError(error.message);
-			setTimeout(() => {
-				setError(null);
-			}, 3000);
-		}
-	};
-
-	useEffect(() => {
-		fetchQueues();
-	}, []);
 
 	return (
 		<DefaultLayout>
-			{error && (
-				<div className="fixed top-0 left-0 md:right-2 md:top-2 md:left-auto w-full md:max-w-[400px] bg-red-300 border-t-4 border-red-600 z-[999] p-2 md:p-3 md:rounded-sm shadow-lg text-sm">
-					{error}
-				</div>
-			)}
-
 			<main className="container mx-auto">
-				{queues && (
-					<ul className="mt-4">
-						{queues.map((queue) => (
-							<li
-								key={queue.id}
-								className="grid grid-cols-5 gap-3 bg-slate-200 dark:bg-slate-800 text-slate-400  rounded-md p-2 mb-2"
-							>
-								<div className="col-span-2">
-									<small className="block text-xs uppercase font-bold text-slate-500">
-										created ad
-									</small>
-									<a href={`/queue/${queue.id}`}>{queue.createdAt}</a>
-								</div>
-								<div className="col-span-1">
-									<small className="block text-xs uppercase font-bold text-slate-500">Queue id</small>
-									<a href={`/queue/${queue.id}`}>{queue.id}</a>
-								</div>
-
-								<div className="col-span-1">
-									<small className="block text-xs uppercase font-bold text-slate-500">status</small>
-									<span>{queue.done ? "done" : "pending"}</span>
-								</div>
-
-								<div className="col-span-1 flex items-center justify-end pr-4">
-									<a href={`/queue/${queue.id}`} className="flex items-center gap-2">
-										<svg
-											xmlns="http://www.w3.org/2000/svg"
-											viewBox="0 0 20 20"
-											fill="currentColor"
-											className="w-5 h-5"
-										>
-											<path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
-											<path
-												fillRule="evenodd"
-												d="M.664 10.59a1.651 1.651 0 0 1 0-1.186A10.004 10.004 0 0 1 10 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0 1 10 17c-4.257 0-7.893-2.66-9.336-6.41ZM14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"
-												clipRule="evenodd"
-											/>
-										</svg>
-										<span>view</span>
-									</a>
-								</div>
-							</li>
-						))}
-					</ul>
-				)}
+				<div className="flex flex-col items-center justify-center h-screen">
+					<div className="max-w-sm w-full space-y-8">
+						<div>
+							<img className="mx-auto h-16 w-auto" src="/logo.png" alt="Kwooza Ads Tool" />
+							<h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+								Sign in to your account
+							</h2>
+						</div>
+						<div>
+							{session ? (
+								<button
+									onClick={() => router.push("/dashboard")}
+									className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+								>
+									Go to Dashboard
+								</button>
+							) : (
+								<button
+									onClick={() => router.push("/auth/login")}
+									className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+								>
+									<span className="absolute left-0 inset-y-0 flex items-center pl-3"></span>
+									Sign in
+								</button>
+							)}
+						</div>
+					</div>
+				</div>
 			</main>
 		</DefaultLayout>
 	);

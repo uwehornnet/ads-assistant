@@ -1,9 +1,7 @@
-import { useEffect, useState, useRef } from "react";
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 
-
-import DefaultLayout from "../../layouts/Default";
+import DashboardLayout from "../../layouts/Dashboard";
 import ActivityIndicator from "@/components/ActivityIndicator";
 
 export default function Job() {
@@ -152,7 +150,7 @@ export default function Job() {
 	}, [queue]);
 
 	return (
-		<DefaultLayout>
+		<DashboardLayout>
 			{error && (
 				<div className="fixed top-0 left-0 md:right-2 md:top-2 md:left-auto w-full md:max-w-[400px] bg-red-300 border-t-4 border-red-600 z-[999] p-2 md:p-3 md:rounded-sm shadow-lg text-sm">
 					{error}
@@ -488,6 +486,6 @@ export default function Job() {
 					</div>
 				)}
 			</main>
-		</DefaultLayout>
+		</DashboardLayout>
 	);
 }
