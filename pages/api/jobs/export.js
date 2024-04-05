@@ -56,11 +56,13 @@ export default async function handler(req, res) {
 					response[`headline_${i + 1}`] = headlines[i]
 						.replace(/([\uE000-\uF8FF]|\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDDFF])/g, "")
 						.replace(/\s{2,}/g, " ")
+						.replace(" ( letters)", "")
 						.replace(",", "");
 				}
 
 				for (let i = 0; i < descriptions.length; i++) {
-					response[`description_${i + 1}`] = descriptions[i]
+					const description = descriptions[i].split(".")[0];
+					response[`description_${i + 1}`] = description
 						.replace(/([\uE000-\uF8FF]|\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDDFF])/g, "")
 						.replace(/\s{2,}/g, " ")
 						.replace(",", "")
@@ -73,6 +75,7 @@ export default async function handler(req, res) {
 		});
 
 		const csv = createCSV(filteredJobs);
+		console.log(csv);
 		const upload = await uploadToS3(csv);
 
 		/**

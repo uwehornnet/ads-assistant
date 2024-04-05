@@ -14,12 +14,36 @@ export default function Job() {
 	const [current, setCurrent] = useState(null);
 	const [queue, setQueue] = useState(null);
 	const [jobs, setJobs] = useState([]);
+	const [search, setSearch] = useState(router.query.search || "");
 	const [page, setPage] = useState(router.query.page || 1);
 	const [pagination, setPagination] = useState(null);
 
 	const fetchJobs = async () => {
 		try {
-			const res = await fetch(`/api/jobs/get?id=${queue.uid}&page=${page}`);
+			let url = `/api/jobs/get?id=${queue.uid}&page=${page}`;
+			if (router.query.search && router.query.search !== "") {
+				url = url + `&search=${router.query.search}`;
+			}
+
+			const res = await fetch(url);
+			const data = await res.json();
+			if (data.status === "error") {
+				setError(data.message);
+			} else {
+				setJobs(data.message.data);
+				setPagination(data.message.pagination);
+			}
+		} catch (error) {
+			setError(error.message);
+		}
+		setLoading(false);
+	};
+
+	const updateJobs = async () => {
+		if (loading) return;
+		setLoading(true);
+		try {
+			const res = await fetch(`/api/jobs/get?id=${queue.uid}&search=${search}`);
 			const data = await res.json();
 			if (data.status === "error") {
 				setError(data.message);
@@ -53,14 +77,16 @@ export default function Job() {
 
 	const updatePage = (page) => {
 		setLoading(true);
-		router.push(
-			{
-				pathname: `/queue/${router.query.id}`,
-				query: { page },
-			},
-			undefined,
-			{ shallow: true }
-		);
+		let params = {
+			pathname: `/queue/${router.query.id}`,
+			query: { page },
+		};
+
+		if (router.query.search) {
+			params.query.search = router.query.search;
+		}
+
+		router.push(params, undefined, { shallow: true });
 		setPage(page);
 	};
 
@@ -78,6 +104,28 @@ export default function Job() {
 				}, 3000);
 			} else {
 				window.open(res.location, "_blank");
+			}
+		} catch (error) {
+			console.log(error);
+			setError(error);
+		}
+		setDisabled(false);
+	};
+
+	const deleteQueue = async () => {
+		if (disabled) return;
+		setDisabled(true);
+		try {
+			const req = await fetch(`/api/queue/delete?id=${queue.uid}`);
+			const res = await req.json();
+
+			if (res.status == "error") {
+				setError(res.message);
+				setTimeout(() => {
+					setError(null);
+				}, 10000);
+			} else {
+				router.push("/");
 			}
 		} catch (error) {
 			console.log(error);
@@ -189,7 +237,21 @@ export default function Job() {
 								</div>
 							</div>
 
-							<div className="mt-4  flex items-center justify-end">
+							<div className="mt-4 flex items-center justify-end gap-4">
+								<button disabled={disabled} onClick={() => deleteQueue()} className="p-2">
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										viewBox="0 0 20 20"
+										fill="currentColor"
+										className="w-5 h-5 text-rose-500"
+									>
+										<path
+											fillRule="evenodd"
+											d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z"
+											clipRule="evenodd"
+										/>
+									</svg>
+								</button>
 								<button
 									disabled={disabled}
 									onClick={() => exportData()}
@@ -209,6 +271,36 @@ export default function Job() {
 						{jobs && jobs.length > 0 ? (
 							<div className=" my-4">
 								<p className="text-slate-600 dark:text-slate-300">Jobs</p>
+
+								<div className="flex items-center gap-2 mb-4">
+									<input
+										type="text"
+										value={search}
+										onChange={(e) => {
+											setSearch(e.target.value);
+										}}
+										placeholder="search for keyword jobs, separated by komma"
+										className="bg-slate-50 dark:bg-slate-800  backdrop-blur-md md:rounded-lg p-2 ring-0 border-0 w-full focus:border-0 outline-none focus:outline-blue-600 outline-2 outline-offset-4 placeholder-slate-800 dark:placeholder-slate-400 text-slate-800 dark:text-slate-400"
+									/>
+									<button
+										onClick={updateJobs}
+										className="bg-blue-700 text-white rounded-md py-2 px-6 disabled:hover:bg-blue-500 disabled:cursor-not-allowed"
+									>
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											viewBox="0 0 20 20"
+											fill="currentColor"
+											className="w-5 h-5"
+										>
+											<path
+												fillRule="evenodd"
+												d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z"
+												clipRule="evenodd"
+											/>
+										</svg>
+									</button>
+								</div>
+
 								<ul className="flex flex-col gap-2 mt-2">
 									{jobs.map((job) => (
 										<li

@@ -88,7 +88,7 @@ export default async function handler(req, res) {
 
 		if (headline.state) {
 			for (const keyword of keywords) {
-				const prompt = `Act like you are an experienced Google ads professional. I want to create one Google ads for: ${keyword}. Generate ${variations} effective ad headline ideas with ${headline.length} letters.`;
+				const prompt = `Act like you are an experienced Google ads professional. I want to create one Google ads for: ${keyword}. Generate 1 effective ad headline ideas with a maximum of ${headline.length} letters.`;
 				const res = await fetchAPIResponse({ prompt });
 
 				const headlineArray = res.message.content.split("\n").map((item) => {
@@ -101,9 +101,9 @@ export default async function handler(req, res) {
 
 		if (description.state) {
 			for (const keyword of keywords) {
-				let prompt = `Act like you are an experienced Google ads professional. I want to create one Google ads for: ${keyword}. Generate ${variations} effective ad copies without linebreaks with max ${description.length} letters.`;
+				let prompt = `Act like you are an experienced Google ads professional. I want to create a Google ad for: ${keyword}. Generate 1 effective ad copy with a maximum of ${description.length} letters.`;
 				if (headline.state) {
-					prompt = `Act like you are an experienced Google ads professional. I want to create Google ads for ${keyword}. Generate max ${variations} effective ad text lines without linebreaks with ${
+					prompt = `Act like you are an experienced Google ads professional. I want to create a Google ad for ${keyword}. Generate max 1 effective ad text lines without linebreaks with ${
 						description.length
 					} letters for the following headlines – ${response.keywords
 						.filter((item) => item.keyword == keyword)[0]

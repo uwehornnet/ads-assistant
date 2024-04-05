@@ -8,7 +8,8 @@ export default async function handler(req, res) {
 		 */
 
 		const size = 20;
-		const pageNumber = req.query.page ? Number(req.query.page) : 1;
+		const pageNumber = req.query.page ? Number(req.query.page) : 0;
+		const search = req.query.search ? req.query.search : null;
 
 		const query = {
 			where: {
@@ -17,6 +18,15 @@ export default async function handler(req, res) {
 			skip: size * pageNumber,
 			take: size,
 		};
+
+		if (search) {
+			query.where.content = {
+				contains: search,
+			};
+		}
+
+		console.log({ query });
+
 		const [jobs, count] = await prisma.$transaction([
 			prisma.job.findMany(query),
 			prisma.job.count({ where: query.where }),
