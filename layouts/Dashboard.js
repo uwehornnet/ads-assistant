@@ -45,7 +45,7 @@ export default function DashboardLayout({ children }) {
 											</div>
 										</div>
 									</div>
-									<div className="hidden md:block">
+									<div className="block">
 										<div className="ml-4 flex items-center md:ml-6">
 											<button
 												onClick={() => signOut()}
@@ -69,7 +69,7 @@ export default function DashboardLayout({ children }) {
 														clipRule="evenodd"
 													/>
 												</svg>
-												<span>sing out</span>
+												<span className="hidden md:block">sing out</span>
 											</button>
 										</div>
 									</div>
