@@ -74,15 +74,17 @@ export default function Queue() {
 				setTimeout(() => {
 					setError(null);
 				}, 3000);
+			} else {
+				/**
+				 * return to dashboard
+				 */
+				setLoading(false);
+				router.push({
+					pathname: "/dashboard/",
+				});
 			}
 
-			/**
-			 * return to dashboard
-			 */
-			setLoading(false);
-			router.push({
-				pathname: "/dashboard/",
-			});
+			
 		} catch (error) {
 			setResults([]);
 			setError(error);

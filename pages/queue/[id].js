@@ -9,11 +9,10 @@ export default function Job() {
 	const [loading, setLoading] = useState(true);
 	const [disabled, setDisabled] = useState(false);
 	const [error, setError] = useState(null);
-	const [current, setCurrent] = useState(null);
 	const [queue, setQueue] = useState(null);
 	const [jobs, setJobs] = useState([]);
 	const [search, setSearch] = useState(router.query.search || "");
-	const [page, setPage] = useState(router.query.page || 1);
+	const [page, setPage] = useState(router.query.page || 0);
 	const [pagination, setPagination] = useState(null);
 
 	const fetchJobs = async () => {
@@ -170,7 +169,7 @@ export default function Job() {
 					</li>
 
 					<li className="relative text-slate-400">
-						<a href="/">Dashboard</a>
+						<a href="/dashboard">Dashboard</a>
 					</li>
 
 					{queue && (
@@ -300,180 +299,108 @@ export default function Job() {
 											key={job.id}
 											className="rounded-md bg-slate-200 dark:bg-slate-800 p-2 text-slate-400"
 										>
-											<div className="grid grid-cols-4 gap-4">
+											<div className="grid grid-cols-5 gap-4">
 												<div>
 													<small className="block text-xs uppercase font-bold text-slate-500">
 														created ad
 													</small>
-													<span>{job.createdAt}</span>
-												</div>
-												<div>
-													<small className="block text-xs uppercase font-bold text-slate-500">
-														id
-													</small>
-													<span
-														className="cursor-pointer"
-														onClick={() => {
-															if (current == job.id) {
-																setCurrent(null);
-															} else {
-																setCurrent(job.id);
-															}
-														}}
-													>
-														{job.id}
-													</span>
+													<span>{new Date(job.createdAt).toLocaleString()}</span>
 												</div>
 												<div>
 													<small className="block text-xs uppercase font-bold text-slate-500">
 														Keyword
 													</small>
 													<span>{job.content?.keywords[0].keyword}</span>
-												</div>
-												<div>
-													<small className="block text-xs uppercase font-bold text-slate-500">
+
+													<small className="block text-xs uppercase font-bold text-slate-500 mt-3">
 														Token used
 													</small>
 													<span>{job.content.token}</span>
 												</div>
-											</div>
-
-											{job.content?.keywords && current == job.id ? (
-												<div className="mt-3">
-													<table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-														<thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-															<tr>
-																<th
-																	scope="col"
-																	className="py-3 px-6 whitespace-pre"
-																	colSpan={1}
-																>
-																	headlines
-																</th>
-																<th
-																	scope="col"
-																	className="py-3 px-6 whitespace-pre"
-																	colSpan={1}
-																>
-																	textlines
-																</th>
-															</tr>
-														</thead>
-														<tbody>
-															{job.content?.keywords.map((item, idx) => (
-																<tr
-																	key={idx}
-																	className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
-																>
-																	<td className="py-4 px-6 whitespace-pre">
-																		{item.headlines.length
-																			? item.headlines.map((headline, i) => (
-																					<p key={i}>{headline}</p>
-																			  ))
-																			: "-"}
-																	</td>
-																	<td className="py-4 px-6 whitespace-pre">
-																		{item.descriptions.length
-																			? item.descriptions.map((textline, i) => (
-																					<p key={i}>
-																						{textline.replace('"', "")}
-																					</p>
-																			  ))
-																			: "-"}
-																	</td>
-																</tr>
-															))}
-														</tbody>
-													</table>
+												<div className="col-span-3">
+													{job.content?.keywords.map((item, idx) => (
+														<div key={idx}>
+															<div>
+																<small className="block text-xs uppercase font-bold text-slate-500">
+																	Adtitle
+																</small>
+																<span>
+																	{item.headlines.length
+																		? item.headlines.map((headline, i) => (
+																				<p key={i}>{headline}</p>
+																		  ))
+																		: "-"}
+																</span>
+															</div>
+															<div className="mt-2">
+																<small className="block text-xs uppercase font-bold text-slate-500">
+																	Adcopy
+																</small>
+																<span>
+																	{item.descriptions.length
+																		? item.descriptions.map((textline, i) => (
+																				<p key={i}>
+																					{textline.replace('"', "")}
+																				</p>
+																		  ))
+																		: "-"}
+																</span>
+															</div>
+														</div>
+													))}
 												</div>
-											) : null}
+											</div>
 										</li>
 									))}
 								</ul>
 
-								<ul className="flex items-center justify-between text-white mt-4">
-									<li>
-										<button
-											className="cursor-pointer dark:text-gray-400 w-6 aspect-square flex items-center justify-center"
-											onClick={() => {
-												if (page > 1) {
-													updatePage(page - 1);
-												}
-											}}
-										>
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												viewBox="0 0 20 20"
-												fill="currentColor"
-												className="w-5 h-5"
+								{pagination && pagination.pages > 1 ? (
+									<ul className="flex items-center justify-between text-white mt-4">
+										<li>
+											<button
+												className="cursor-pointer dark:text-gray-400 w-6 aspect-square flex items-center justify-center"
+												onClick={() => {
+													if (page > 1) {
+														updatePage(page - 1);
+													}
+												}}
 											>
-												<path
-													fillRule="evenodd"
-													d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"
-													clipRule="evenodd"
-												/>
-											</svg>
-										</button>
-									</li>
-									<li className="flex items-center justify-center gap-2 text-sm">
-										<span
-											className="cursor-pointer text-slate-400 dark:text-slate-600"
-											onClick={() => updatePage(page + 1)}
-										>
-											{page + 1}
-										</span>
-										<span
-											className="cursor-pointer text-slate-400 dark:text-slate-600"
-											onClick={() => updatePage(page + 2)}
-										>
-											{page + 2}
-										</span>
-										<span
-											className="cursor-pointer text-slate-400 dark:text-slate-600"
-											onClick={() => updatePage(page + 3)}
-										>
-											{page + 3}
-										</span>
-										<span
-											className="cursor-pointer text-slate-400 dark:text-slate-600"
-											onClick={() => updatePage(page + 4)}
-										>
-											{page + 4}
-										</span>
-										<span
-											className="cursor-pointer text-slate-400 dark:text-slate-600"
-											onClick={() => updatePage(page + 5)}
-										>
-											{page + 5}
-										</span>
-										<span>...</span>
-										<span
-											className="cursor-pointer text-slate-400 dark:text-slate-600"
-											onClick={() => updatePage(page + pagination?.pages - 1)}
-										>
-											{pagination?.pages - 1}
-										</span>
-									</li>
-									<li>
-										<button
-											className="cursor-pointer dark:text-gray-400 w-6 aspect-square flex items-center justify-center"
-											onClick={() => updatePage(page + 1)}
-										>
-											<svg
-												xmlns="http://www.w3.org/2000/svg"
-												viewBox="0 0 20 20"
-												fill="currentColor"
-												className="w-5 h-5"
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													viewBox="0 0 20 20"
+													fill="currentColor"
+													className="w-5 h-5"
+												>
+													<path
+														fillRule="evenodd"
+														d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"
+														clipRule="evenodd"
+													/>
+												</svg>
+											</button>
+										</li>
+
+										<li>
+											<button
+												className="cursor-pointer dark:text-gray-400 w-6 aspect-square flex items-center justify-center"
+												onClick={() => updatePage(page + 1)}
 											>
-												<path
-													fillRule="evenodd"
-													d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z"
-													clipRule="evenodd"
-												/>
-											</svg>
-										</button>
-									</li>
-								</ul>
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													viewBox="0 0 20 20"
+													fill="currentColor"
+													className="w-5 h-5"
+												>
+													<path
+														fillRule="evenodd"
+														d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z"
+														clipRule="evenodd"
+													/>
+												</svg>
+											</button>
+										</li>
+									</ul>
+								) : null}
 							</div>
 						) : null}
 					</div>

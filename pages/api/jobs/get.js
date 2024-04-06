@@ -7,6 +7,7 @@ export default async function handler(req, res) {
 		 *
 		 */
 
+
 		const size = 20;
 		const pageNumber = req.query.page ? Number(req.query.page) : 0;
 		const search = req.query.search ? req.query.search : null;
@@ -19,18 +20,20 @@ export default async function handler(req, res) {
 			take: size,
 		};
 
+		console.log({ query });
+
 		if (search) {
 			query.where.content = {
 				contains: search,
 			};
 		}
 
-		console.log({ query });
-
 		const [jobs, count] = await prisma.$transaction([
 			prisma.job.findMany(query),
 			prisma.job.count({ where: query.where }),
 		]);
+
+		console.log({ jobs, count });
 
 		/**
 		 * return response

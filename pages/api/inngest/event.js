@@ -8,10 +8,12 @@ export default async function handler(req, res) {
 	}
 
 	try {
-		await inngest.send({
+		const event = await inngest.send({
 			name: "api/create.ad",
 			data: { id },
 		});
+
+		return res.status(200).json({ status: "success", message: event });
 	} catch (error) {
 		return res.status(500).json({ status: "error", message: error.message });
 	}

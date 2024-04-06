@@ -40,10 +40,8 @@ export const createAd = inngest.createFunction(
 					},
 				});
 
-				console.log({ queue });
-
 				if (!queue) {
-					return { event, body: "Error, no que found in database" };
+					return { event, body: "Error, no queue found in database" };
 				}
 
 				/**
@@ -57,10 +55,13 @@ export const createAd = inngest.createFunction(
 
 				const { keywords: allKeywords, headline, description } = JSON.parse(queue.content);
 
+				if (jobs.length == allKeywords.length) {
+					return { event, body: "All keywords processed" };
+				}
+
 				/**
 				 * prepare response object
 				 */
-
 				const response = {
 					token: 0,
 					keywords: [],
@@ -69,7 +70,11 @@ export const createAd = inngest.createFunction(
 				 * prepare response object with keywords
 				 */
 				const keywords = [allKeywords[jobs.length]];
-				console.log({ keywords });
+				if (!keywords.length) {
+					return { event, body: "No keywords found" };
+				}
+
+				// return { event, body: "moving on to next keyword" };
 				for (const keyword of keywords) {
 					response.keywords.push({
 						keyword,
@@ -82,11 +87,11 @@ export const createAd = inngest.createFunction(
 							const prompt = `Act like you are an experienced Google ads professional. I want to create one Google ads for: ${keyword}. Generate 1 effective ad headline ideas with a maximum of ${headline.length} letters.`;
 							const res = await fetchAPIResponse({ prompt });
 
-							const headlineArray = res.message.content.split("\n").map((item) => {
-								return item.replace(/[0-9]/g, "").replace(". ", "").replace('"', "").replace('"', "");
-							});
+							// const headlineArray = res.message.content.split("\n").map((item) => {
+							// 	return item.replace(/[0-9]/g, "").replace(". ", "").replace('"', "").replace('"', "");
+							// });
 							response.keywords.filter((item) => item.keyword == keyword)[0].headlines = [
-								...headlineArray,
+								res.message.content.replace('"', "").replace('"', ""),
 							];
 							response.token += res.usage;
 						}
@@ -105,18 +110,15 @@ export const createAd = inngest.createFunction(
 							}
 
 							const res = await fetchAPIResponse({ prompt });
-
-							const descriptionArray = res.message.content.split("\n").map((item) => {
-								return item
-									.trim()
-									.replace(/[0-9]/g, "")
-									.replace(/(\r\n|\n|\r)/gm, "")
-									.replace('"\n', "")
-									.replace(". ", "")
-									.replace('"', "");
-							});
+							// const descriptionArray = res.message.content.split("\n").map((item) => {
+							// 	return item
+							// 		.trim()
+							// 		.replace(/[0-9]/g, "")
+							// 		.replace(/(\r\n|\n|\r)/gm, "")
+							// 		.replace('"', "");
+							// });
 							response.keywords.filter((item) => item.keyword == keyword)[0].descriptions = [
-								...descriptionArray,
+								res.message.content.replace('"', "").replace('"', ""),
 							];
 							response.token += res.usage;
 						}
@@ -127,19 +129,23 @@ export const createAd = inngest.createFunction(
 					 */
 					const job = await prisma.job.create({
 						data: {
-							queueId: queue.uid,
 							content: JSON.stringify(response),
+							status: "completed",
+							queue: {
+								connect: {
+									uid: queue.uid,
+								},
+							},
 						},
 					});
-
-					console.log({ job });
-
 					if (job && jobs.length + 1 == allKeywords.length) {
 						const updatedQueue = await prisma.queue.update({
 							where: {
-								id: event.data.id,
+								uid: event.data.id,
 							},
-							done: true,
+							data: {
+								done: true,
+							},
 						});
 						return { event, body: JSON.stringify(updatedQueue) };
 					} else {
