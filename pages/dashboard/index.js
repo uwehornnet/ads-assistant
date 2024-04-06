@@ -46,7 +46,7 @@ export default function Dashboard(props) {
 						{queues.map((queue) => (
 							<li
 								key={queue.id}
-								className="grid grid-cols-5 gap-3 bg-slate-200 dark:bg-slate-800 text-slate-400  rounded-md p-2 mb-2"
+								className="grid md:grid-cols-5 gap-3 bg-slate-200 dark:bg-slate-800 text-slate-400  rounded-md p-2 mb-2"
 							>
 								<div className="col-span-1">
 									<small className="block text-xs uppercase font-bold text-slate-500">
@@ -54,7 +54,7 @@ export default function Dashboard(props) {
 									</small>
 									<a href={`/queue/${queue.id}`}>{new Date(queue.createdAt).toLocaleString()}</a>
 								</div>
-								<div className="col-span-2">
+								<div className="md:col-span-2">
 									<small className="block text-xs uppercase font-bold text-slate-500">Queue id</small>
 									<a href={`/queue/${queue.id}`}>{queue.id}</a>
 								</div>
@@ -99,7 +99,7 @@ export default function Dashboard(props) {
 									</span>
 								</div>
 
-								<div className="col-span-1 flex items-center justify-end pr-4">
+								<div className="col-span-1 flex items-center justify-center md:justify-end pr-4">
 									<a
 										href={`/queue/${queue.id}`}
 										className="flex items-center gap-2 text-blue-700 dark:text-blue-600"

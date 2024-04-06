@@ -299,7 +299,7 @@ export default function Job() {
 											key={job.id}
 											className="rounded-md bg-slate-200 dark:bg-slate-800 p-2 text-slate-400"
 										>
-											<div className="grid grid-cols-5 gap-4">
+											<div className="grid md:grid-cols-5 gap-4">
 												<div>
 													<small className="block text-xs uppercase font-bold text-slate-500">
 														created ad
@@ -317,7 +317,7 @@ export default function Job() {
 													</small>
 													<span>{job.content.token}</span>
 												</div>
-												<div className="col-span-3">
+												<div className="md:col-span-3">
 													{job.content?.keywords.map((item, idx) => (
 														<div key={idx}>
 															<div>
@@ -332,7 +332,7 @@ export default function Job() {
 																		: "-"}
 																</span>
 															</div>
-															<div className="mt-2">
+															<div className="mt-4 md:mt-2">
 																<small className="block text-xs uppercase font-bold text-slate-500">
 																	Adcopy
 																</small>
