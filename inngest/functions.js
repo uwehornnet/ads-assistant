@@ -88,43 +88,96 @@ export const createAd = inngest.createFunction(
 
 					if (headline.state) {
 						for (const keyword of keywords) {
-							const prompt = `Act like you are an experienced Google ads professional. I want to create one Google ads for: ${keyword}. Generate 1 effective ad headline ideas with a maximum of ${headline.length} letters.`;
-							const res = await fetchAPIResponse({ prompt });
+							const minCharacters = headline.length - 8;
+							let prompt = `Act like you are an experienced Google ads professional. I want to create one Google ads for: ${keyword}. Generate 1 effective ad headline idea with a maximum of ${headline.length} characters.`;
 
-							// const headlineArray = res.message.content.split("\n").map((item) => {
-							// 	return item.replace(/[0-9]/g, "").replace(". ", "").replace('"', "").replace('"', "");
-							// });
+							let res = await fetchAPIResponse({ prompt });
+							let usage = res.usage;
+							console.log(`first try headline length: ${res.message.content.length}`);
+							if (
+								res.message.content.length < minCharacters ||
+								res.message.content.length > headline.length
+							) {
+								let message = res.message.content;
+								let length = message.length;
+								let tryCount = 2;
+								let prompt = `Act like you are an experienced Google ads professional. Rewrite this Ads headline:${message}.  Make sure the headline has between ${minCharacters} and ${headline.length} characters.`;
+
+								while ((length < minCharacters || length > headline.length) && tryCount < 6) {
+									if (length > headline.length) {
+										prompt = `Act like you are an experienced Google ads professional. Rewrite this Ads headline: ${message} and it not exeeds ${headline.length} characters.`;
+									}
+
+									if (length < minCharacters) {
+										prompt = `Act like you are an experienced Google ads professional. Rewrite this Ads headline: ${message} and it not less than ${minCharacters} characters and not more than ${headline.length} characters.`;
+									}
+									res = await fetchAPIResponse({ prompt });
+									console.log(
+										`${tryCount}. try headline length: ${res.message.content.length}, message: ${res.message.content}`
+									);
+									length = res.message.content.length;
+									message = res.message.content;
+									usage += res.usage;
+									tryCount++;
+								}
+							}
+
 							response.keywords.filter((item) => item.keyword == keyword)[0].headlines = [
 								res.message.content.replace('"', "").replace('"', ""),
 							];
-							response.token += res.usage;
+							response.token += usage;
 						}
 					}
 
 					if (description.state) {
 						for (const keyword of keywords) {
-							let prompt = `Act like you are an experienced Google ads professional. I want to create a Google ad for: ${keyword}. Generate 1 effective ad copy with a maximum of ${description.length} letters.`;
+							const minCharacters = description.length - 30;
+							let prompt = `Act like you are an experienced Google ads professional. I want to create a Google ad for: ${keyword}. Generate 1 effective ad copy line with a maximum of ${description.length} characters.`;
 							if (headline.state) {
-								prompt = `Act like you are an experienced Google ads professional. I want to create a Google ad for ${keyword}. Generate max 1 effective ad text lines without linebreaks with ${
+								prompt = `Act like you are an experienced Google ads professional. I want to create a Google ad for ${keyword}. Generate 1 effective ad copy line with a maximum of ${
 									description.length
-								} letters for the following headlines – ${response.keywords
+								} characters for the following headlines – ${response.keywords
 									.filter((item) => item.keyword == keyword)[0]
 									.headlines.map((headline) => `"${headline}"`)
-									.join(", ")}`;
+									.join(", ")}. Rewrite it if it exceeds ${description.length} characters.`;
 							}
 
-							const res = await fetchAPIResponse({ prompt });
-							// const descriptionArray = res.message.content.split("\n").map((item) => {
-							// 	return item
-							// 		.trim()
-							// 		.replace(/[0-9]/g, "")
-							// 		.replace(/(\r\n|\n|\r)/gm, "")
-							// 		.replace('"', "");
-							// });
+							let res = await fetchAPIResponse({ prompt });
+							let usage = res.usage;
+							console.log(`description length: ${res.message.content.length}`);
+							if (
+								res.message.content.length < minCharacters ||
+								res.message.content.length > description.length
+							) {
+								let message = res.message.content;
+								let length = message.length;
+								let tryCount = 2;
+								prompt = `Act like you are an experienced Google ads professional. Rewrite this effective ad copy: ${message}. Make sure the text has between ${minCharacters} and ${description.length} characters.`;
+
+								while ((length < minCharacters || length > description.length) && tryCount < 6) {
+									if (length > description.length) {
+										prompt = `Act like you are an experienced Google ads professional. Rewrite this effective ad copy: ${message} and it not exeeds ${description.length} characters.`;
+									}
+
+									if (length < minCharacters) {
+										prompt = `Act like you are an experienced Google ads professional. Rewrite this effective ad copy: ${message} and it not less than ${minCharacters} characters and not more than ${description.length} characters.`;
+									}
+
+									res = await fetchAPIResponse({ prompt });
+									console.log(
+										`${tryCount}. try description length: ${res.message.content.length}, message: ${res.message.content}`
+									);
+									length = res.message.content.length;
+									message = res.message.content;
+									tryCount++;
+									usage += res.usage;
+								}
+							}
+
 							response.keywords.filter((item) => item.keyword == keyword)[0].descriptions = [
 								res.message.content.replace('"', "").replace('"', ""),
 							];
-							response.token += res.usage;
+							response.token += usage;
 						}
 					}
 
