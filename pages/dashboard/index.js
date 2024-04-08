@@ -18,6 +18,7 @@ export default function Dashboard(props) {
 					setError(null);
 				}, 3000);
 			} else {
+				console.log(data.message);
 				setQueues(data.message);
 			}
 		} catch (error) {
@@ -46,8 +47,12 @@ export default function Dashboard(props) {
 						{queues.map((queue) => (
 							<li
 								key={queue.id}
-								className="grid md:grid-cols-5 gap-3 bg-slate-200 dark:bg-slate-800 text-slate-400  rounded-md p-2 mb-2"
+								className="grid md:grid-cols-6 gap-3 bg-slate-200 dark:bg-slate-800 text-slate-400 border-slate-300 dark:border-slate-800 rounded-md p-2 mb-2"
 							>
+								<div className="col-span-1">
+									<small className="block text-xs uppercase font-bold text-slate-500">Title</small>
+									<a href={`/queue/${queue.id}`}>{queue.content?.title}</a>
+								</div>
 								<div className="col-span-1">
 									<small className="block text-xs uppercase font-bold text-slate-500">
 										created ad

@@ -12,6 +12,7 @@ export default async function handler(req, res) {
 				id: queue.id,
 				uid: queue.uid,
 				done: queue.done,
+				content: JSON.parse(queue.content),
 				createdAt: new Date(queue.createdAt).toString(),
 			};
 		});

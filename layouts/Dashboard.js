@@ -1,10 +1,6 @@
 import { useSession, signOut } from "next-auth/react";
 import { Disclosure } from "@headlessui/react";
-
-const navigation = [
-	{ name: "Dashboard", href: "/dashboard", current: true },
-	{ name: "Create Queue", href: "/queue/create", current: true },
-];
+import { useRouter } from "next/router";
 
 function classNames(...classes) {
 	return classes.filter(Boolean).join(" ");
@@ -12,6 +8,8 @@ function classNames(...classes) {
 
 export default function DashboardLayout({ children }) {
 	const { data: session } = useSession();
+	const router = useRouter();
+	console.log(router.pathname);
 
 	return (
 		<div className="min-h-full">
@@ -25,23 +23,35 @@ export default function DashboardLayout({ children }) {
 										<div className="flex-shrink-0">
 											<img className="h-8 w-auto" src="/logo.png" alt="Kwooza Ads Tool" />
 										</div>
-										<div className="hidden md:block">
+										<div className="block">
 											<div className="ml-10 flex items-baseline space-x-4">
-												{navigation.map((item) => (
-													<a
-														key={item.name}
-														href={item.href}
-														className={classNames(
-															item.current
-																? "bg-blue-700 dark:bg-slate-700 text-white"
-																: "text-gray-300 hover:bg-gray-700 hover:text-white",
-															"rounded-md px-3 py-2 text-sm font-medium"
-														)}
-														aria-current={item.current ? "page" : undefined}
+												<a
+													href="/queue/create"
+													className={classNames(
+														router.pathname == "queue/create"
+															? "bg-blue-700 dark:bg-slate-700 text-white"
+															: "text-gray-300 bg-gray-700/20 hover:bg-gray-700 hover:text-white",
+														"rounded-md px-3 py-2 text-sm font-medium flex items-center gap-2"
+													)}
+													aria-current="page"
+												>
+													<svg
+														xmlns="http://www.w3.org/2000/svg"
+														fill="none"
+														viewBox="0 0 24 24"
+														strokeWidth={1.5}
+														stroke="currentColor"
+														className="w-4 h-4"
 													>
-														{item.name}
-													</a>
-												))}
+														<path
+															strokeLinecap="round"
+															strokeLinejoin="round"
+															d="M12 4.5v15m7.5-7.5h-15"
+														/>
+													</svg>
+
+													<span className="hidden md:block">create Queue</span>
+												</a>
 											</div>
 										</div>
 									</div>
@@ -50,7 +60,7 @@ export default function DashboardLayout({ children }) {
 											<button
 												onClick={() => signOut()}
 												type="button"
-												className="flex items-center gap-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
+												className="flex items-center gap-3 text-gray-300 bg-gray-700/20 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
 											>
 												<svg
 													xmlns="http://www.w3.org/2000/svg"

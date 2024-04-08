@@ -26,7 +26,7 @@ const fetchAPIResponse = async ({ prompt }) => {
 
 export default async function handler(req, res) {
 	try {
-		const { keywords, headline, description, variations } = req.body;
+		const { title, respondMail, keywords, headline, description } = req.body;
 		/**
 		 * queue id to be fetched from DB
 		 */
@@ -34,16 +34,10 @@ export default async function handler(req, res) {
 		const queue = await prisma.queue.create({
 			data: {
 				uid: queueId,
-				content: JSON.stringify({ keywords, headline, description, variations }),
+				content: JSON.stringify({ title, respondMail, keywords, headline, description }),
 				done: false,
 			},
 		});
-
-		console.log(queue);
-
-		/**
-		 * make DB query to insert into DB if queue id is not present
-		 */
 
 		/**
 		 * prepare response object

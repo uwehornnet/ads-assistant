@@ -3,6 +3,10 @@ import prisma from "../lib/prisma";
 import { inngest } from "./client";
 import { NonRetriableError } from "inngest";
 
+import { render } from "@react-email/render";
+import { sendEmail } from "@/lib/email";
+import QueueFinishedEmail from "@/emails/QueueFinishedEmailTemplate";
+
 const openai = new OpenAI({
 	apiKey: process.env.OPENAI_API_KEY || process.env.REACT_APP_OPENAI_API_KEY,
 });
@@ -147,6 +151,17 @@ export const createAd = inngest.createFunction(
 								done: true,
 							},
 						});
+
+						inngest.send(
+							{
+								name: "api/send.mail",
+								data: { id: event.data.id },
+							},
+							{
+								delay: 5000,
+							}
+						);
+
 						return { event, body: JSON.stringify(updatedQueue) };
 					} else {
 						inngest.send(
@@ -165,6 +180,60 @@ export const createAd = inngest.createFunction(
 			});
 		} catch (error) {
 			throw new NonRetriableError("Store not found", { cause: error });
+		}
+	}
+);
+
+export const sendMail = inngest.createFunction(
+	{ id: "sendMail" },
+	{ event: "api/send.mail" },
+	async ({ event, step }) => {
+		try {
+			return await step.run("sendMail", async () => {
+				/**
+				 * check for id in request
+				 */
+				const { id } = event.data;
+				if (!id) return { event, body: "Error, no id found in event data" };
+
+				/**
+				 * fetch queue by id
+				 */
+				const queue = await prisma.queue.findFirst({
+					where: {
+						uid: id,
+					},
+				});
+				if (!queue) return { event, body: "Error, no queue found in database" };
+
+				/**
+				 * check for responder in queue
+				 */
+				const responder = JSON.parse(queue.content).respondMail;
+				if (!responder) return { event, body: "Error, no responder found in queue" };
+
+				console.log("Mail sent to responder: ", responder);
+				/**
+				 * send mail to responder
+				 */
+
+				// send mail logic here
+				const emailSent = await sendEmail({
+					to: responder,
+					subject: "Unlock Your Potential with Kwooza!",
+					html: render(
+						QueueFinishedEmail({
+							id: queue.uid,
+						})
+					),
+				});
+
+				if (!emailSent) return { event, body: "Error sending mail" };
+
+				return { event, body: `Mail sent to: ${responder}` };
+			});
+		} catch (error) {
+			throw new NonRetriableError("Error sending Email", { cause: error });
 		}
 	}
 );

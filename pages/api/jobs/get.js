@@ -20,8 +20,6 @@ export default async function handler(req, res) {
 			take: size,
 		};
 
-		console.log({ query });
-
 		if (search) {
 			query.where.content = {
 				contains: search,
@@ -33,7 +31,6 @@ export default async function handler(req, res) {
 			prisma.job.count({ where: query.where }),
 		]);
 
-		console.log({ jobs, count });
 
 		/**
 		 * return response

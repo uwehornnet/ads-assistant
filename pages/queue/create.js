@@ -11,6 +11,7 @@ import { Switch } from "@headlessui/react";
 import DashboardLayout from "@/layouts/Dashboard";
 import ActivityIndicator from "@/components/ActivityIndicator";
 
+
 export default function Queue() {
 	const router = useRouter();
 
@@ -23,6 +24,8 @@ export default function Queue() {
 	const [results, setResults] = useState([]);
 	const [showModal, setShowModal] = useState(false);
 
+	const [title, setTitle] = useState("Campaign, AdGroup, etc");
+	const [respondMail, setRespondMail] = useState("info@uwe-horn.net");
 	const [keywords, setKeywords] = useState("airbag steering wheels, battery garden sparyer, exhaust resonator pipe");
 	const [headline, setHeadline] = useState({
 		state: true,
@@ -48,6 +51,8 @@ export default function Queue() {
 					"Content-Type": "application/json",
 				},
 				body: JSON.stringify({
+					title,
+					respondMail,
 					keywords: keywords.split(","),
 					headline,
 					description,
@@ -83,8 +88,6 @@ export default function Queue() {
 					pathname: "/dashboard/",
 				});
 			}
-
-			
 		} catch (error) {
 			setResults([]);
 			setError(error);
@@ -260,6 +263,20 @@ export default function Queue() {
 			<Modal isOpen={showModal} toggle={toggleModal}>
 				<>
 					<div className="flex flex-col gap-2 my-8">
+						<div className="flex-1 flex flex-col gap-1">
+							<label className="text-slate-400 dark:text-slate-600 uppercase text-xs font-bold">
+								Title
+							</label>
+							<input
+								type="text"
+								value={title}
+								onChange={(e) => {
+									setTitle(e.target.value);
+								}}
+								className="ring-0 border-0 w-full focus:border-0 outline-none focus:outline-blue-600 outline-2 outline-offset-2 block p-2 rounded-md dark:bg-slate-700 dark:text-slate-200 disabled:text-slate-500 disabled:cursor-not-allowed"
+							/>
+						</div>
+
 						<div className="flex items-center justify-start">
 							<label className="flex items-center gap-2 dark:text-slate-200">
 								<Switch
@@ -322,6 +339,20 @@ export default function Queue() {
 									className="ring-0 border-0 w-full focus:border-0 outline-none focus:outline-blue-600 outline-2 outline-offset-2 block max-w-[80px]  p-2 rounded-md dark:bg-slate-700 dark:text-slate-200 text-right disabled:text-slate-500 disabled:cursor-not-allowed"
 								/>
 							</div>
+						</div>
+
+						<div className="flex-1 flex flex-col gap-1">
+							<label className="text-slate-400 dark:text-slate-600 uppercase text-xs font-bold">
+								Responder Mail
+							</label>
+							<input
+								type="text"
+								value={respondMail}
+								onChange={(e) => {
+									setRespondMail(e.target.value);
+								}}
+								className="ring-0 border-0 w-full focus:border-0 outline-none focus:outline-blue-600 outline-2 outline-offset-2 block p-2 rounded-md dark:bg-slate-700 dark:text-slate-200 disabled:text-slate-500 disabled:cursor-not-allowed"
+							/>
 						</div>
 					</div>
 					<div className="mt-4 flex items-center justify-start gap-4">
