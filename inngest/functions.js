@@ -7,6 +7,7 @@ import { render } from "@react-email/render";
 import { sendEmail } from "@/lib/email";
 import QueueFinishedEmail from "@/emails/QueueFinishedEmailTemplate";
 
+
 const openai = new OpenAI({
 	apiKey: process.env.OPENAI_API_KEY || process.env.REACT_APP_OPENAI_API_KEY,
 });
@@ -20,12 +21,69 @@ const fetchAPIResponse = async ({ prompt }) => {
 			},
 		],
 		model: "gpt-3.5-turbo",
-		temperature: 0.3,
+		temperature: 1,
 	});
 
 	return {
 		message: response.choices[0].message,
 		usage: response.usage.total_tokens,
+	};
+};
+
+const createAdHeadline = async ({ keyword, headline, string = null }) => {
+	let prompt = `Act like you are an experienced Google ads professional. I want to create one Google ads for: ${keyword}. Generate 3 variations ad headlines with a maximum number of ${headline.length} charatcers each.`;
+	if (string) {
+		prompt = `Act like you are an experienced Google ads professional. Rewrite this ad headline: ${string} so it NOT exceeds ${headline.length} characters.`;
+	}
+	const res = await fetchAPIResponse({ prompt });
+
+	const headlineArray = res.message.content.split("\n").map((item) => {
+		return item.replace(/[0-9]/g, "").replace(". ", "").replace('"', "").replace('"', "");
+	});
+
+	return {
+		message: [...headlineArray.filter((item) => item.length > 0)],
+		usage: res.usage,
+	};
+};
+
+const createAdDescription = async ({ keyword, description, headline }) => {
+	let prompt = `Act like you are an experienced Google ads professional. I want to create a Google ad for: ${keyword}. Generate 1 ad copy from this headline - ${headline} with a maximum number of ${description.length} characters and spaces combined. remove any unnecessary words and character count information. avoid exact headline text in ad copy and use of emojis if possible.`;
+	let res = await fetchAPIResponse({ prompt });
+	let usage = res.usage;
+	let retry = res.message.content.replace('"', "").replace('"', "").length > description.length;
+	let message = res.message.content.replace('"', "").replace('"', "");
+	let round = 0;
+	while (retry && round < 3) {
+		if (message.length > description.length) {
+			prompt = `Act like you are an experienced Google ads professional. Shorten this ad copy: ${message} so it does NOT exceed ${
+				description.length - 5
+			} characters. Try to make it more engaging. Remove any unnecessary words.`;
+		} else {
+			prompt = `Act like you are an experienced Google ads professional. Rewrite: ${message} so it NOT exceeds ${description.length} characters.`;
+		}
+
+		res = await fetchAPIResponse({ prompt });
+		retry =
+			res.message.content.replace('"', "").replace('"', "").length <= description.length &&
+			res.message.content.replace('"', "").replace('"', "").length > description.length - 35
+				? false
+				: true;
+		message = res.message.content.replace('"', "").replace('"', "");
+
+		console.log({
+			message,
+			usage,
+			retry,
+			round,
+		});
+		usage += res.usage;
+		round++;
+	}
+
+	return {
+		message,
+		usage,
 	};
 };
 
@@ -79,6 +137,7 @@ export const createAd = inngest.createFunction(
 				}
 
 				// return { event, body: "moving on to next keyword" };
+
 				for (const keyword of keywords) {
 					response.keywords.push({
 						keyword,
@@ -88,96 +147,42 @@ export const createAd = inngest.createFunction(
 
 					if (headline.state) {
 						for (const keyword of keywords) {
-							const minCharacters = headline.length - 8;
-							let prompt = `Act like you are an experienced Google ads professional. I want to create one Google ads for: ${keyword}. Generate 1 effective ad headline idea with a maximum of ${headline.length} characters.`;
+							const res = await createAdHeadline({
+								keyword,
+								headline,
+							});
 
-							let res = await fetchAPIResponse({ prompt });
 							let usage = res.usage;
-							console.log(`first try headline length: ${res.message.content.length}`);
-							if (
-								res.message.content.length < minCharacters ||
-								res.message.content.length > headline.length
-							) {
-								let message = res.message.content;
-								let length = message.length;
-								let tryCount = 2;
-								let prompt = `Act like you are an experienced Google ads professional. Rewrite this Ads headline:${message}.  Make sure the headline has between ${minCharacters} and ${headline.length} characters.`;
+							for (const item of res.message) {
+								if (item.length > headline.length) {
+									const req = await createAdHeadline({
+										string: item,
+										headline,
+									});
 
-								while ((length < minCharacters || length > headline.length) && tryCount < 6) {
-									if (length > headline.length) {
-										prompt = `Act like you are an experienced Google ads professional. Rewrite this Ads headline: ${message} and it not exeeds ${headline.length} characters.`;
-									}
-
-									if (length < minCharacters) {
-										prompt = `Act like you are an experienced Google ads professional. Rewrite this Ads headline: ${message} and it not less than ${minCharacters} characters and not more than ${headline.length} characters.`;
-									}
-									res = await fetchAPIResponse({ prompt });
-									console.log(
-										`${tryCount}. try headline length: ${res.message.content.length}, message: ${res.message.content}`
-									);
-									length = res.message.content.length;
-									message = res.message.content;
-									usage += res.usage;
-									tryCount++;
+									response.keywords
+										.filter((item) => item.keyword == keyword)[0]
+										.headlines.push(req.message[0]);
+									usage += req.usage;
+								} else {
+									response.keywords.filter((item) => item.keyword == keyword)[0].headlines.push(item);
 								}
 							}
-
-							response.keywords.filter((item) => item.keyword == keyword)[0].headlines = [
-								res.message.content.replace('"', "").replace('"', ""),
-							];
 							response.token += usage;
 						}
 					}
 
 					if (description.state) {
 						for (const keyword of keywords) {
-							const minCharacters = description.length - 30;
-							let prompt = `Act like you are an experienced Google ads professional. I want to create a Google ad for: ${keyword}. Generate 1 effective ad copy line with a maximum of ${description.length} characters.`;
-							if (headline.state) {
-								prompt = `Act like you are an experienced Google ads professional. I want to create a Google ad for ${keyword}. Generate 1 effective ad copy line with a maximum of ${
-									description.length
-								} characters for the following headlines – ${response.keywords
+							const headlines = response.keywords.filter((item) => item.keyword == keyword)[0].headlines;
+							for (const headline of headlines) {
+								const res = await createAdDescription({ keyword, description, headline });
+								console.log(`response ${keyword}`, res);
+								response.keywords
 									.filter((item) => item.keyword == keyword)[0]
-									.headlines.map((headline) => `"${headline}"`)
-									.join(", ")}. Rewrite it if it exceeds ${description.length} characters.`;
+									.descriptions.push(res.message);
+								response.token += res.usage;
 							}
-
-							let res = await fetchAPIResponse({ prompt });
-							let usage = res.usage;
-							console.log(`description length: ${res.message.content.length}`);
-							if (
-								res.message.content.length < minCharacters ||
-								res.message.content.length > description.length
-							) {
-								let message = res.message.content;
-								let length = message.length;
-								let tryCount = 2;
-								prompt = `Act like you are an experienced Google ads professional. Rewrite this effective ad copy: ${message}. Make sure the text has between ${minCharacters} and ${description.length} characters.`;
-
-								while ((length < minCharacters || length > description.length) && tryCount < 6) {
-									if (length > description.length) {
-										prompt = `Act like you are an experienced Google ads professional. Rewrite this effective ad copy: ${message} and it not exeeds ${description.length} characters.`;
-									}
-
-									if (length < minCharacters) {
-										prompt = `Act like you are an experienced Google ads professional. Rewrite this effective ad copy: ${message} and it not less than ${minCharacters} characters and not more than ${description.length} characters.`;
-									}
-
-									res = await fetchAPIResponse({ prompt });
-									console.log(
-										`${tryCount}. try description length: ${res.message.content.length}, message: ${res.message.content}`
-									);
-									length = res.message.content.length;
-									message = res.message.content;
-									tryCount++;
-									usage += res.usage;
-								}
-							}
-
-							response.keywords.filter((item) => item.keyword == keyword)[0].descriptions = [
-								res.message.content.replace('"', "").replace('"', ""),
-							];
-							response.token += usage;
 						}
 					}
 

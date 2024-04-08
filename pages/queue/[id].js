@@ -376,7 +376,9 @@ export default function Job() {
 																<span>
 																	{item.headlines.length
 																		? item.headlines.map((headline, i) => (
-																				<p key={i}>{headline}</p>
+																				<p
+																					key={i}
+																				>{`${headline} (${headline.length})`}</p>
 																		  ))
 																		: "-"}
 																</span>
@@ -388,9 +390,9 @@ export default function Job() {
 																<span>
 																	{item.descriptions.length
 																		? item.descriptions.map((textline, i) => (
-																				<p key={i}>
-																					{textline.replace('"', "")}
-																				</p>
+																				<p
+																					key={i}
+																				>{`${textline} (${textline.length})`}</p>
 																		  ))
 																		: "-"}
 																</span>
